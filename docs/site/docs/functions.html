@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Functions - NERD</title>
+  <meta name="description" content="NERD standard library.">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="../index.html" class="logo">NERD</a>
+      <ul>
+        <li><a href="../about.html">Story</a></li>
+        <li><a href="index.html" class="active">Docs</a></li>
+        <li><a href="../team.html">Authors</a></li>
+        <li>
+          <a href="https://github.com/Nerd-Lang/nerd-lang-core" class="github-link" target="_blank">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <h4>Start</h4>
+        <ul>
+          <li><a href="index.html">Install</a></li>
+          <li><a href="basics.html">Basics</a></li>
+        </ul>
+        <h4>Reference</h4>
+        <ul>
+          <li><a href="spec.html">Spec</a></li>
+          <li><a href="functions.html" class="active">Functions</a></li>
+        </ul>
+        <h4>Project</h4>
+        <ul>
+          <li><a href="roadmap.html">Roadmap</a></li>
+        </ul>
+      </aside>
+
+      <div class="docs-content">
+        <h1>Functions</h1>
+
+        <h2>core</h2>
+        <p>Built-in. No import needed.</p>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>plus</code> <code>minus</code> <code>times</code> <code>over</code> <code>mod</code></td><td>arithmetic</td></tr>
+            <tr><td><code>eq</code> <code>neq</code> <code>lt</code> <code>gt</code> <code>lte</code> <code>gte</code></td><td>comparison</td></tr>
+            <tr><td><code>and</code> <code>or</code> <code>not</code></td><td>logical</td></tr>
+          </tbody>
+        </table>
+
+        <h2>math</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>math abs x</code></td><td>absolute value</td></tr>
+            <tr><td><code>math min x y</code></td><td>minimum</td></tr>
+            <tr><td><code>math max x y</code></td><td>maximum</td></tr>
+            <tr><td><code>math floor x</code></td><td>round down</td></tr>
+            <tr><td><code>math ceil x</code></td><td>round up</td></tr>
+            <tr><td><code>math round x</code></td><td>round nearest</td></tr>
+            <tr><td><code>math sqrt x</code></td><td>square root</td></tr>
+            <tr><td><code>math pow x y</code></td><td>power</td></tr>
+            <tr><td><code>math log x</code></td><td>natural log</td></tr>
+            <tr><td><code>math sin x</code></td><td>sine</td></tr>
+            <tr><td><code>math cos x</code></td><td>cosine</td></tr>
+            <tr><td><code>math random</code></td><td>0 to 1</td></tr>
+          </tbody>
+        </table>
+
+        <h2>str</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>str len s</code></td><td>length</td></tr>
+            <tr><td><code>str concat a b</code></td><td>join</td></tr>
+            <tr><td><code>str split s sep</code></td><td>split</td></tr>
+            <tr><td><code>str trim s</code></td><td>whitespace</td></tr>
+            <tr><td><code>str upper s</code></td><td>uppercase</td></tr>
+            <tr><td><code>str lower s</code></td><td>lowercase</td></tr>
+            <tr><td><code>str contains s sub</code></td><td>has substring</td></tr>
+            <tr><td><code>str replace s old new</code></td><td>replace all</td></tr>
+            <tr><td><code>str slice s start end</code></td><td>substring</td></tr>
+          </tbody>
+        </table>
+
+        <h2>list</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>list len l</code></td><td>length</td></tr>
+            <tr><td><code>list get l i</code></td><td>at index</td></tr>
+            <tr><td><code>list set l i v</code></td><td>set index</td></tr>
+            <tr><td><code>list push l v</code></td><td>append</td></tr>
+            <tr><td><code>list pop l</code></td><td>remove last</td></tr>
+            <tr><td><code>list first l</code></td><td>first element</td></tr>
+            <tr><td><code>list last l</code></td><td>last element</td></tr>
+            <tr><td><code>list slice l start end</code></td><td>sublist</td></tr>
+            <tr><td><code>list reverse l</code></td><td>reverse</td></tr>
+            <tr><td><code>list sort l</code></td><td>sort</td></tr>
+            <tr><td><code>list map l fn</code></td><td>transform</td></tr>
+            <tr><td><code>list filter l fn</code></td><td>keep matching</td></tr>
+            <tr><td><code>list reduce l fn init</code></td><td>fold</td></tr>
+          </tbody>
+        </table>
+
+        <h2>time</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>time now</code></td><td>unix ms</td></tr>
+            <tr><td><code>time date</code></td><td>ISO string</td></tr>
+            <tr><td><code>time parse s</code></td><td>parse string</td></tr>
+            <tr><td><code>time format t fmt</code></td><td>format</td></tr>
+            <tr><td><code>time year t</code></td><td>get year</td></tr>
+            <tr><td><code>time month t</code></td><td>get month</td></tr>
+            <tr><td><code>time day t</code></td><td>get day</td></tr>
+          </tbody>
+        </table>
+
+        <h2>err</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>err new msg</code></td><td>create error</td></tr>
+            <tr><td><code>err msg e</code></td><td>get message</td></tr>
+            <tr><td><code>err is x</code></td><td>check if error</td></tr>
+            <tr><td><code>err wrap e msg</code></td><td>add context</td></tr>
+          </tbody>
+        </table>
+
+        <h2>http</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>http get url</code></td><td>GET</td></tr>
+            <tr><td><code>http post url body</code></td><td>POST</td></tr>
+            <tr><td><code>http put url body</code></td><td>PUT</td></tr>
+            <tr><td><code>http delete url</code></td><td>DELETE</td></tr>
+          </tbody>
+        </table>
+
+        <h2>json</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>json parse s</code></td><td>parse string</td></tr>
+            <tr><td><code>json string x</code></td><td>to JSON</td></tr>
+            <tr><td><code>json get x path</code></td><td>get field</td></tr>
+            <tr><td><code>json set x path v</code></td><td>set field</td></tr>
+            <tr><td><code>json has x path</code></td><td>field exists</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      NERD | Apache 2.0 |
+      <a href="https://github.com/Nerd-Lang/nerd-lang-core">GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

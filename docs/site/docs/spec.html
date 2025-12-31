@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spec - NERD</title>
+  <meta name="description" content="NERD language specification.">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="../index.html" class="logo">NERD</a>
+      <ul>
+        <li><a href="../about.html">Story</a></li>
+        <li><a href="index.html" class="active">Docs</a></li>
+        <li><a href="../team.html">Authors</a></li>
+        <li>
+          <a href="https://github.com/Nerd-Lang/nerd-lang-core" class="github-link" target="_blank">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <h4>Start</h4>
+        <ul>
+          <li><a href="index.html">Install</a></li>
+          <li><a href="basics.html">Basics</a></li>
+        </ul>
+        <h4>Reference</h4>
+        <ul>
+          <li><a href="spec.html" class="active">Spec</a></li>
+          <li><a href="functions.html">Functions</a></li>
+        </ul>
+        <h4>Project</h4>
+        <ul>
+          <li><a href="roadmap.html">Roadmap</a></li>
+        </ul>
+      </aside>
+
+      <div class="docs-content">
+        <h1>Spec</h1>
+
+        <h2>Types</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>num</code></td><td>f64</td></tr>
+            <tr><td><code>int</code></td><td>i64</td></tr>
+            <tr><td><code>str</code></td><td>string</td></tr>
+            <tr><td><code>bool</code></td><td>boolean</td></tr>
+            <tr><td><code>void</code></td><td>no value</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Keywords</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>fn</code></td><td>function</td></tr>
+            <tr><td><code>ret</code></td><td>return</td></tr>
+            <tr><td><code>type</code></td><td>type definition</td></tr>
+            <tr><td><code>if</code></td><td>conditional</td></tr>
+            <tr><td><code>let</code></td><td>binding</td></tr>
+            <tr><td><code>call</code></td><td>function call</td></tr>
+            <tr><td><code>ok</code></td><td>success</td></tr>
+            <tr><td><code>err</code></td><td>error</td></tr>
+            <tr><td><code>or</code></td><td>union separator</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Operators</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>plus</code></td><td>+</td></tr>
+            <tr><td><code>minus</code></td><td>-</td></tr>
+            <tr><td><code>times</code></td><td>*</td></tr>
+            <tr><td><code>over</code></td><td>/</td></tr>
+            <tr><td><code>mod</code></td><td>%</td></tr>
+            <tr><td><code>eq</code></td><td>==</td></tr>
+            <tr><td><code>neq</code></td><td>!=</td></tr>
+            <tr><td><code>lt</code> <code>gt</code> <code>lte</code> <code>gte</code></td><td>&lt; &gt; &lt;= &gt;=</td></tr>
+            <tr><td><code>and</code> <code>or</code> <code>not</code></td><td>logical</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Positional</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>first</code></td><td>param 0</td></tr>
+            <tr><td><code>second</code></td><td>param 1</td></tr>
+            <tr><td><code>third</code></td><td>param 2</td></tr>
+            <tr><td><code>fourth</code></td><td>param 3</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Numbers</h2>
+        <p><code>zero</code> <code>one</code> <code>two</code> <code>three</code> <code>four</code> <code>five</code> <code>six</code> <code>seven</code> <code>eight</code> <code>nine</code> <code>ten</code></p>
+
+        <h2>Syntax</h2>
+
+        <h3>Function</h3>
+        <pre><code>fn name params...
+body</code></pre>
+
+        <h3>Return</h3>
+        <pre><code>ret value
+ret ok value
+ret err value</code></pre>
+
+        <h3>Type</h3>
+        <pre><code>type name fields...
+type name ok type or err type</code></pre>
+
+        <h3>Conditional</h3>
+        <pre><code>if condition statement</code></pre>
+
+        <h3>Binding</h3>
+        <pre><code>let name value</code></pre>
+
+        <h3>Call</h3>
+        <pre><code>call function args...</code></pre>
+
+        <h2>Examples</h2>
+
+        <h3>Math</h3>
+        <pre><code>fn add a b
+ret a plus b
+
+fn sub a b
+ret a minus b</code></pre>
+
+        <h3>Calculator</h3>
+        <pre><code>type result ok num or err str
+
+fn calc a b op
+if op eq zero ret ok a plus b
+if op eq one ret ok a minus b
+ret err "unknown"</code></pre>
+
+        <h3>Function Calls</h3>
+        <pre><code>fn square x
+ret x times x
+
+fn hypotenuse a b
+let asq call square a
+let bsq call square b
+ret math sqrt asq plus bsq</code></pre>
+
+        <h2>Comments</h2>
+        <pre><code>-- this is a comment
+# this too</code></pre>
+
+        <h2>Compilation</h2>
+        <pre><code>NERD → Lexer → Parser → AST → LLVM IR → clang → native</code></pre>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      NERD | Apache 2.0 |
+      <a href="https://github.com/Nerd-Lang/nerd-lang-core">GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

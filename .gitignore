@@ -1,0 +1,20 @@
+# Build artifacts
+/bootstrap/build/
+/bootstrap/nerd
+
+# Generated LLVM IR (except test harnesses)
+*.ll
+!bootstrap/test_*.ll
+
+# macOS
+.DS_Store
+
+# Editor/IDE
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# AI context (not needed in repo)
+CLAUDE.md

@@ -1,0 +1,8 @@
+type result ok num or err str
+
+fn calc a b op
+if op eq zero ret ok a plus b
+if op eq one ret ok a minus b
+if op eq two ret ok a times b
+if op eq three ret ok a over b
+ret err "unknown operation"

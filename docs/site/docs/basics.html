@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Basics - NERD</title>
+  <meta name="description" content="NERD fundamentals.">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="../index.html" class="logo">NERD</a>
+      <ul>
+        <li><a href="../about.html">Story</a></li>
+        <li><a href="index.html" class="active">Docs</a></li>
+        <li><a href="../team.html">Authors</a></li>
+        <li>
+          <a href="https://github.com/Nerd-Lang/nerd-lang-core" class="github-link" target="_blank">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <h4>Start</h4>
+        <ul>
+          <li><a href="index.html">Install</a></li>
+          <li><a href="basics.html" class="active">Basics</a></li>
+        </ul>
+        <h4>Reference</h4>
+        <ul>
+          <li><a href="spec.html">Spec</a></li>
+          <li><a href="functions.html">Functions</a></li>
+        </ul>
+        <h4>Project</h4>
+        <ul>
+          <li><a href="roadmap.html">Roadmap</a></li>
+        </ul>
+      </aside>
+
+      <div class="docs-content">
+        <h1>Basics</h1>
+
+        <h2>Plain English</h2>
+        <p>NERD uses words, not symbols. Every keyword is an English word that tokenizes as a single token in LLMs.</p>
+        <pre><code>-- Instead of: a + b
+a plus b
+
+-- Instead of: a == b
+a eq b
+
+-- Instead of: return x
+ret x</code></pre>
+
+        <h2>No Symbols</h2>
+        <p>No curly braces. No semicolons. No parentheses. No arrows. Just words and whitespace.</p>
+        <pre><code>-- Traditional
+function add(a, b) { return a + b; }
+
+-- NERD
+fn add a b
+ret a plus b</code></pre>
+
+        <h2>No Brackets</h2>
+        <p>Function calls don't need parentheses. Arguments are space-separated.</p>
+        <pre><code>-- Traditional
+sqrt(pow(a, 2) + pow(b, 2))
+
+-- NERD
+math sqrt asq plus bsq</code></pre>
+
+        <h2>Newlines Matter</h2>
+        <p>Each statement is on its own line. No statement terminators needed.</p>
+        <pre><code>fn hypotenuse a b
+let asq call square a
+let bsq call square b
+ret math sqrt asq plus bsq</code></pre>
+
+        <h2>Words as Operators</h2>
+        <table class="comparison-table">
+          <tbody>
+            <tr><td><code>+</code></td><td>→</td><td><code>plus</code></td></tr>
+            <tr><td><code>-</code></td><td>→</td><td><code>minus</code></td></tr>
+            <tr><td><code>*</code></td><td>→</td><td><code>times</code></td></tr>
+            <tr><td><code>/</code></td><td>→</td><td><code>over</code></td></tr>
+            <tr><td><code>==</code></td><td>→</td><td><code>eq</code></td></tr>
+            <tr><td><code>!=</code></td><td>→</td><td><code>neq</code></td></tr>
+            <tr><td><code><</code></td><td>→</td><td><code>lt</code></td></tr>
+            <tr><td><code>></code></td><td>→</td><td><code>gt</code></td></tr>
+            <tr><td><code>&&</code></td><td>→</td><td><code>and</code></td></tr>
+            <tr><td><code>||</code></td><td>→</td><td><code>or</code></td></tr>
+            <tr><td><code>!</code></td><td>→</td><td><code>not</code></td></tr>
+          </tbody>
+        </table>
+
+        <h2>Words as Numbers</h2>
+        <p>Small integers have word equivalents for maximum token efficiency.</p>
+        <pre><code>if op eq zero ret ok a plus b
+if op eq one ret ok a minus b
+if op eq two ret ok a times b</code></pre>
+
+        <h2>Why This Works</h2>
+        <p>LLMs tokenize common English words as single tokens. Symbols often fragment.</p>
+        <ul>
+          <li><code>function</code> → 1 token</li>
+          <li><code>===</code> → 2-3 tokens</li>
+          <li><code>plus</code> → 1 token</li>
+          <li><code>>=</code> → 2 tokens</li>
+        </ul>
+        <p>Result: same logic, 50-70% fewer tokens.</p>
+
+        <h2>Comments</h2>
+        <pre><code>-- double dash for comments
+# hash works too</code></pre>
+
+        <h2>Next</h2>
+        <p>See <a href="spec.html">Spec</a> for the full language reference.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      NERD | Apache 2.0 |
+      <a href="https://github.com/Nerd-Lang/nerd-lang-core">GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>
+

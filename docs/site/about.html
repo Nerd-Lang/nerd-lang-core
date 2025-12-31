@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story - NERD</title>
+  <meta name="description" content="Why NERD exists.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="index.html" class="logo">NERD</a>
+      <ul>
+        <li><a href="about.html" class="active">Story</a></li>
+        <li><a href="docs/index.html">Docs</a></li>
+        <li><a href="team.html">Authors</a></li>
+        <li>
+          <a href="https://github.com/Nerd-Lang/nerd-lang-core" class="github-link" target="_blank">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <article>
+      <h1>The Story</h1>
+
+      <h2>The Question</h2>
+      <p>40% of code is now written by LLMs. That number is growing.</p>
+      <p>I was using Claude Code, watching it generate TypeScript. A thought hit me:</p>
+      <p><strong>Why is Claude writing code that I'm supposed to read?</strong></p>
+      <p>I wasn't going to read it line-by-line. I'd skim it, run the tests. So why make AI write in a format optimized for human readers who aren't reading?</p>
+
+      <h2>The Stack</h2>
+      <pre><code>1950s: Machine code
+1960s: Assembly
+1970s: C
+1980s: C++
+1990s: Java, Python
+2000s: Frameworks
+2020s: AI writes, humans review</code></pre>
+      <p>Each step made it easier for humans to express intent. But now AI is the primary author. AI doesn't need <code>public static void main</code>.</p>
+
+      <h2>The Insight</h2>
+      <p>LLMs tokenize English words efficiently. Symbols like <code>{</code>, <code>}</code>, <code>===</code> fragment into multiple tokens. Words like "plus", "minus", "if" are single tokens.</p>
+      <p>So instead of cryptic compression, use dense English.</p>
+
+      <h2>The Design</h2>
+      <p><strong>NERD</strong> = <strong>N</strong>o <strong>E</strong>ffort <strong>R</strong>equired, <strong>D</strong>one</p>
+      <ul>
+        <li><strong>Not human-friendly</strong>: dense, terse, machine-optimized</li>
+        <li><strong>Human-observable</strong>: auditable, verifiable</li>
+        <li><strong>50-70% fewer tokens</strong>: same logic, less cost</li>
+        <li><strong>Native compilation</strong>: LLVM, no runtime</li>
+      </ul>
+
+      <h2>The Result</h2>
+      <pre><code>fn add a b
+ret a plus b
+
+fn calc a b op
+if op eq zero ret ok a plus b
+if op eq one ret ok a minus b
+ret err "unknown"</code></pre>
+      <p>67% fewer tokens than TypeScript. Same functionality.</p>
+
+      <h2>The Workflow</h2>
+      <pre><code>Human: "Add rate limiting"
+  |
+LLM writes NERD
+  |
+Compiles to native
+  |
+Human observes (read-only)
+  |
+Human: "Make it 100 req/min"
+  |
+LLM modifies NERD</code></pre>
+      <p>Humans are stakeholders, not authors.</p>
+
+      <h2>The Objections</h2>
+
+      <h3>"But I need to debug!"</h3>
+      <p>Do you debug JVM bytecode? V8's internals? No. You debug at your abstraction layer. If that layer is natural language, debugging becomes: "Hey Claude, the login is failing for users with + in their email."</p>
+
+      <h3>"Compliance requires readable code!"</h3>
+      <p>Auditable != authored by humans. A translated view can show data flow, constraints, security measures, in plain English. More auditable than 2am spaghetti code.</p>
+
+      <h2>The Bet</h2>
+      <p>In five years, most production code won't be human-written. When that happens, TypeScript will feel like asking Claude to write in Latin.</p>
+      <p>NERD is what source code becomes when humans stop pretending they need to write it.</p>
+
+      <h2>The Disclaimer</h2>
+      <p>This could be wrong. Maybe humans will always want to edit code directly. Maybe 40% plateaus. NERD is an experiment: a bootstrap compiler in C, compiling to LLVM IR, no dependencies.</p>
+      <p>If the answer is interesting, great. If not, it was worth exploring.</p>
+    </article>
+  </main>
+
+  <footer>
+    <p>
+      NERD | Apache 2.0 |
+      <a href="https://github.com/Nerd-Lang/nerd-lang-core">GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>

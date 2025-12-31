@@ -1,0 +1,11 @@
+fn add a b
+ret a plus b
+
+fn sub a b
+ret a minus b
+
+fn mul a b
+ret a times b
+
+fn div a b
+ret a over b

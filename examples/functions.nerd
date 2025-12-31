@@ -1,0 +1,20 @@
+-- NERD Functions Example
+-- Demonstrates user-defined function calls
+
+fn square x
+ret x times x
+
+fn cube x
+ret x times call square x
+
+fn add a b
+ret a plus b
+
+fn double x
+ret call add x x
+
+fn hypotenuse a b
+let asq call square a
+let bsq call square b
+let sum asq plus bsq
+ret math sqrt sum
