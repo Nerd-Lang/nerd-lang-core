@@ -86,71 +86,28 @@ ret err "unknown operation"
 
 ## Installation
 
-### Quick Install (macOS/Linux)
+### macOS (Apple Silicon)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Nerd-Lang/nerd-lang-core/main/install.sh | sh
+curl -L https://raw.githubusercontent.com/Nerd-Lang/nerd-lang-core/main/bin/nerd-darwin-arm64 -o nerd
+chmod +x nerd
+sudo mv nerd /usr/local/bin/
 ```
 
-### Build from Source
+### Build from Source (other platforms)
 
 ```bash
 git clone https://github.com/Nerd-Lang/nerd-lang-core.git
 cd nerd-lang-core/bootstrap
 make
-sudo make install  # Optional: install to /usr/local/bin
 ```
 
-### Prerequisites
+Requires: C compiler and clang (`xcode-select --install` on macOS)
 
-NERD compiles to LLVM IR, which requires clang to build native binaries.
-
-#### macOS
-
-```bash
-# Option 1: Xcode Command Line Tools (recommended)
-xcode-select --install
-
-# Option 2: Homebrew
-brew install llvm
-```
-
-Tested on: macOS 12+ (Monterey and later), Apple Silicon (M1/M2/M3) and Intel
-
-#### Linux
-
-```bash
-# Ubuntu/Debian
-sudo apt update
-sudo apt install build-essential clang
-
-# Fedora
-sudo dnf install clang gcc make
-
-# Arch
-sudo pacman -S clang gcc make
-```
-
-Tested on: Ubuntu 20.04+, Debian 11+, Fedora 38+
-
-#### Windows
-
-```powershell
-# Option 1: winget
-winget install LLVM.LLVM
-
-# Option 2: Download from https://releases.llvm.org/
-```
-
-After installing LLVM, ensure `clang` is in your PATH.
-
-Tested on: Windows 10/11 with LLVM 15+
-
-### Verify Installation
+### Verify
 
 ```bash
 nerd --version
-clang --version
 ```
 
 ## Quick Start

@@ -18,3 +18,5 @@
 
 # AI context (not needed in repo)
 CLAUDE.md
+
+# Note: /bin/ directory contains pre-built binaries (intentionally tracked)

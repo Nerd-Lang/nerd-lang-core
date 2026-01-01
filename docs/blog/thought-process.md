@@ -484,8 +484,8 @@ The NERD specification is at: [spec/NERD-SPEC.md](../../spec/NERD-SPEC.md)
 The bootstrap compiler is working. It compiles NERD to native binaries via LLVM. Built from scratch in C, no dependencies.
 
 ```bash
-# Install
-curl -fsSL https://raw.githubusercontent.com/Nerd-Lang/nerd-lang-core/main/install.sh | sh
+# macOS (Apple Silicon)
+curl -L https://raw.githubusercontent.com/Nerd-Lang/nerd-lang-core/main/bin/nerd-darwin-arm64 -o nerd && chmod +x nerd
 
 # Or build from source
 git clone https://github.com/Nerd-Lang/nerd-lang-core.git

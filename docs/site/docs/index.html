@@ -49,7 +49,12 @@
         <h1>Install</h1>
 
         <h2 id="quick">Quick</h2>
-        <pre><code>curl -fsSL https://raw.githubusercontent.com/Nerd-Lang/nerd-lang-core/main/install.sh | sh</code></pre>
+        <pre><code># macOS (Apple Silicon)
+curl -L https://raw.githubusercontent.com/Nerd-Lang/nerd-lang-core/main/bin/nerd-darwin-arm64 -o nerd && chmod +x nerd
+
+# Or build from source
+git clone https://github.com/Nerd-Lang/nerd-lang-core.git
+cd nerd-lang-core/bootstrap && make</code></pre>
 
         <h2 id="source">From Source</h2>
         <pre><code>git clone https://github.com/Nerd-Lang/nerd-lang-core.git
