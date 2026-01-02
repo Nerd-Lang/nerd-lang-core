@@ -220,7 +220,7 @@ static bool is_module_token(Parser *parser) {
     TokenType t = parser_current(parser)->type;
     return t == TOK_MATH || t == TOK_STR || t == TOK_LIST ||
            t == TOK_TIME || t == TOK_HTTP || t == TOK_JSON || t == TOK_ERR ||
-           t == TOK_MCP;
+           t == TOK_MCP || t == TOK_LLM;
 }
 
 /*

@@ -13,8 +13,59 @@
   <link rel="icon" type="image/png" href="images/nerd-dark.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Story - NERD</title>
-  <meta name="description" content="Why NERD exists.">
+  <meta name="description" content="Why NERD exists. The story of an LLM-native language.">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .article-card {
+      background: var(--surface);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      display: block;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .article-card:hover {
+      border-color: var(--accent);
+    }
+    .article-card h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+    .article-card p {
+      margin: 0;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+    .article-card .meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+    .article-card .badge {
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+    }
+    .section-label {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
 <body>
   <nav>
@@ -38,8 +89,22 @@
   <main>
     <article>
       <h1>The Story</h1>
+      <p style="color: var(--text-dim); margin-bottom: 2rem;">How NERD came to be, and where it's going.</p>
 
-      <h2>The Question</h2>
+      <p class="section-label">Latest</p>
+      <a href="/agent-first" class="article-card">
+        <h3>LLM-Native Language Going Agent-First</h3>
+        <p>Why we're prioritizing agentic use cases. Tools absorb complexity, orchestration gets simpler, and a purpose-built language makes sense.</p>
+        <div class="meta">
+          <span class="badge">New</span>
+          <span>January 2026</span>
+        </div>
+      </a>
+
+      <hr class="section-divider">
+
+      <p class="section-label">The Foundation</p>
+      <h2 id="foundation">The Question</h2>
       <p>40% of code is now written by LLMs. That number is growing.</p>
       <p>I was using Claude Code, watching it generate TypeScript. A thought hit me:</p>
       <p><strong>Why is Claude writing code that I'm supposed to read?</strong></p>
@@ -62,7 +127,7 @@
       <h2>The Design</h2>
       <p><strong>NERD</strong> = <strong>N</strong>o <strong>E</strong>ffort <strong>R</strong>equired, <strong>D</strong>one</p>
       <ul>
-        <li><strong>Not human-friendly</strong>: dense, terse, machine-optimized</li>
+        <li><strong>Not for human authorship</strong>: dense, terse, machine-optimized</li>
         <li><strong>Human-observable</strong>: auditable, verifiable</li>
         <li><strong>50-70% fewer tokens</strong>: same logic, less cost</li>
         <li><strong>Native compilation</strong>: LLVM, no runtime</li>
@@ -113,7 +178,13 @@ LLM modifies NERD</code></pre>
       <p>This could be wrong. Maybe humans will always want to edit code directly. Maybe 40% plateaus. NERD is an experiment: a bootstrap compiler in C, compiling to LLVM IR, no dependencies.</p>
       <p>If the answer is interesting, great. If not, it was worth exploring.</p>
 
-      <p style="margin-top: 3rem; text-align: center;">
+      <hr class="section-divider">
+
+      <p style="text-align: center; color: var(--text-dim);">
+        <a href="/agent-first">Continue reading: LLM-Native Language Going Agent-First →</a>
+      </p>
+
+      <p style="margin-top: 2rem; text-align: center;">
         <a href="https://github.com/Nerd-Lang/nerd-lang-core" target="_blank" style="color: var(--text-dim); border: none;">
           <svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20" style="vertical-align: middle; margin-right: 0.5rem;">
             <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>

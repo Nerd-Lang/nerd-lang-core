@@ -422,11 +422,20 @@ let data json parse text
 
 ## What's Next
 
-The bootstrap compiler is working and compiles NERD to native code via LLVM. To make it production-ready:
+The bootstrap compiler is working and compiles NERD to native code via LLVM.
 
-1. **Implement standard library** — String, list, HTTP, JSON modules
-2. **Build the human view** — Generate diagrams from NERD
-3. **Fine-tune models** — Train models specifically on NERD generation
+**Update (January 2026):** We've shifted to an **agent-first** approach. Instead of building a general-purpose language, we're prioritizing capabilities needed for agentic use cases:
+
+1. ✅ **HTTP module** — GET, POST requests
+2. ✅ **LLM module** — Native calls to Claude
+3. ✅ **MCP support** — Remote tool discovery and execution
+4. **JSON handling** — Parse, generate, extract
+5. **SSE/Streaming** — Real-time LLM responses
+6. **Human view** — Generate diagrams from NERD
+
+The philosophy: tools (MCP engines) absorb integration complexity. What remains is thin orchestration. NERD is that thin layer.
+
+Read more: [LLM-Native Language Going Agent-First](https://www.nerd-lang.org/agent-first)
 
 ---
 
@@ -522,23 +531,33 @@ Contributions welcome. The whole thing is open source.
 
 ## Roadmap
 
-What's next for NERD:
+What's next for NERD (agent-first priorities):
+
+**Done:**
+- [x] Bootstrap compiler (C, LLVM IR, native binaries)
+- [x] Control flow (if/else, loops, functions)
+- [x] HTTP module (GET, POST)
+- [x] LLM module (Claude API)
+- [x] MCP support (remote tools)
+- [x] Implicit main, .env support
 
 **Near term:**
-- [ ] More built-in functions (string operations, list manipulation)
-- [ ] Standard library expansion (HTTP client, JSON parsing)
-- [ ] Better error messages in the compiler
-- [ ] WASM target (browser support)
+- [ ] JSON parsing and generation
+- [ ] String operations (for gluing LLM responses to tool inputs)
+- [ ] SSE / HTTP streaming
+- [ ] OpenAI support
+- [ ] Better error messages
 
 **Medium term:**
-- [ ] Human View generator — visualize NERD as diagrams and English
-- [ ] IDE integration — syntax highlighting, LSP support
-- [ ] More examples and documentation
+- [ ] Conversation state / multi-turn
+- [ ] Human View generator
+- [ ] List operations
+- [ ] WASM target
 
 **Long term:**
 - [ ] Fine-tuned models for NERD generation
-- [ ] Integration with Claude Code and other AI coding tools
-- [ ] Production deployments and case studies
+- [ ] Integration with Claude Code and other AI tools
+- [ ] Production deployments
 
 If any of this sounds interesting, come build with us.
 

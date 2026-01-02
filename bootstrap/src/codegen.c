@@ -649,6 +649,38 @@ static int codegen_expr(CodeGen *cg, ASTNode *node) {
                 return result_reg;
             }
 
+            // LLM module calls
+            if (strcmp(node->data.call.module, "llm") == 0) {
+                if (node->data.call.args.count >= 1) {
+                    ASTNode *prompt_node = node->data.call.args.nodes[0];
+
+                    // llm claude "prompt" - Call Claude
+                    if (strcmp(node->data.call.func, "claude") == 0) {
+                        if (prompt_node->type == NODE_STR) {
+                            int prompt_idx = cg->string_counter++;
+                            size_t prompt_len = actual_string_len(prompt_node->data.str.value) + 1;
+
+                            int prompt_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                    prompt_ptr, prompt_len, prompt_len, prompt_idx);
+
+                            // Call llm_claude
+                            int response_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_llm_claude(i8* %%t%d)\n", response_ptr, prompt_ptr);
+
+                            // Free response
+                            fprintf(cg->out, "  call void @nerd_llm_free(i8* %%t%d)\n", response_ptr);
+                        }
+
+                        fprintf(cg->out, "  %%t%d = fadd double 0.0, 0.0\n", result_reg);
+                        return result_reg;
+                    }
+                }
+
+                fprintf(cg->out, "  %%t%d = fadd double 0.0, 0.0\n", result_reg);
+                return result_reg;
+            }
+
             // Default: return 0 for unimplemented calls
             fprintf(cg->out, "  %%t%d = fadd double 0.0, 0.0\n", result_reg);
             return result_reg;
@@ -1010,6 +1042,11 @@ bool codegen_llvm(NerdContext *ctx, const char *output_path) {
     fprintf(out, "declare i8* @nerd_mcp_send(i8*, i8*, i8*)\n");
     fprintf(out, "declare i8* @nerd_mcp_init(i8*)\n");
     fprintf(out, "declare void @nerd_mcp_free(i8*)\n");
+    fprintf(out, "\n");
+
+    // LLM runtime declarations
+    fprintf(out, "declare i8* @nerd_llm_claude(i8*)\n");
+    fprintf(out, "declare void @nerd_llm_free(i8*)\n");
     fprintf(out, "\n");
 
     // Format strings for output

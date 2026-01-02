@@ -10,6 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
 #include "nerd.h"
 
 /*
@@ -107,6 +111,7 @@ static const char *token_name(TokenType type) {
         case TOK_HTTP: return "HTTP";
         case TOK_JSON: return "JSON";
         case TOK_MCP: return "MCP";
+        case TOK_LLM: return "LLM";
         case TOK_NUMBER: return "NUMBER";
         case TOK_STRING: return "STRING";
         case TOK_IDENT: return "IDENT";
@@ -456,6 +461,14 @@ static int cmd_run(int argc, char **argv) {
         return 1;
     }
 
+    // Check which modules are used
+    bool needs_http = false, needs_mcp = false, needs_llm = false;
+    for (size_t i = 0; i < lexer->token_count; i++) {
+        if (lexer->tokens[i].type == TOK_HTTP) needs_http = true;
+        if (lexer->tokens[i].type == TOK_MCP) needs_mcp = true;
+        if (lexer->tokens[i].type == TOK_LLM) needs_llm = true;
+    }
+
     // Parse
     Parser *parser = parser_create(lexer->tokens, lexer->token_count);
     if (!parser) {
@@ -492,78 +505,137 @@ static int cmd_run(int argc, char **argv) {
         return 1;
     }
 
-    // Generate main() wrapper that calls each function
-    FILE *main_file = fopen(tmp_main, "w");
-    if (!main_file) {
-        fprintf(stderr, "Error: Cannot create temp file\n");
-        ast_free(ast);
-        parser_free(parser);
-        lexer_free(lexer);
-        free(source);
-        return 1;
-    }
-
-    fprintf(main_file, "; Auto-generated main for nerd run\n\n");
-    fprintf(main_file, "@.fmt = private constant [11 x i8] c\"%%s = %%.0f\\0A\\00\"\n");
-    fprintf(main_file, "declare i32 @printf(i8*, ...)\n\n");
-
-    // Generate function name strings
+    // Check if there's a main function in the AST
     ASTNode *program = ast;
-    size_t func_count = program->data.program.functions.count;
-
-    for (size_t i = 0; i < func_count; i++) {
+    bool has_main = false;
+    for (size_t i = 0; i < program->data.program.functions.count; i++) {
         ASTNode *func = program->data.program.functions.nodes[i];
-        const char *name = func->data.func_def.name;
-        fprintf(main_file, "@.name%zu = private constant [%zu x i8] c\"%s\\00\"\n", 
-                i, strlen(name) + 1, name);
-    }
-
-    fprintf(main_file, "\ndefine i32 @main() {\n");
-    fprintf(main_file, "entry:\n");
-
-    // Call each function and print result
-    for (size_t i = 0; i < func_count; i++) {
-        ASTNode *func = program->data.program.functions.nodes[i];
-        const char *name = func->data.func_def.name;
-        size_t param_count = func->data.func_def.params.count;
-        
-        // Call function with test args (5, 3, 1, 1, ...)
-        fprintf(main_file, "  %%r%zu = call double @%s(", i, name);
-        for (size_t j = 0; j < param_count; j++) {
-            if (j > 0) fprintf(main_file, ", ");
-            if (j == 0) fprintf(main_file, "double 5.0");
-            else if (j == 1) fprintf(main_file, "double 3.0");
-            else fprintf(main_file, "double 1.0");
+        if (strcmp(func->data.func_def.name, "main") == 0) {
+            has_main = true;
+            break;
         }
-        fprintf(main_file, ")\n");
-        
-        // Get pointers
-        fprintf(main_file, "  %%fmt%zu = getelementptr [11 x i8], [11 x i8]* @.fmt, i32 0, i32 0\n", i);
-        fprintf(main_file, "  %%nm%zu = getelementptr [%zu x i8], [%zu x i8]* @.name%zu, i32 0, i32 0\n", 
-                i, strlen(name) + 1, strlen(name) + 1, i);
-        
-        // Print
-        fprintf(main_file, "  call i32 (i8*, ...) @printf(i8* %%fmt%zu, i8* %%nm%zu, double %%r%zu)\n", i, i, i);
     }
 
-    fprintf(main_file, "  ret i32 0\n");
-    fprintf(main_file, "}\n");
-    fclose(main_file);
+    char cmd[2048];
+    
+    if (has_main) {
+        // Program has main - create i32 wrapper that calls nerd's double main
+        // Rename the NERD main to nerd_main, then create i32 main wrapper
+        snprintf(cmd, sizeof(cmd), 
+            "sed 's/define double @main/define double @nerd_main/g' %s > %s",
+            tmp_ll, tmp_combined);
+        if (system(cmd) != 0) {
+            fprintf(stderr, "Error: Failed to process file\n");
+            ast_free(ast); parser_free(parser); lexer_free(lexer); free(source);
+            return 1;
+        }
+        
+        // Append i32 main wrapper
+        FILE *f = fopen(tmp_combined, "a");
+        if (f) {
+            fprintf(f, "\n; Entry point wrapper\n");
+            fprintf(f, "define i32 @main() {\n");
+            fprintf(f, "entry:\n");
+            fprintf(f, "  call double @nerd_main()\n");
+            fprintf(f, "  ret i32 0\n");
+            fprintf(f, "}\n");
+            fclose(f);
+        }
+    } else {
+        // No main - generate test wrapper (old behavior for library-style code)
+        FILE *main_file = fopen(tmp_main, "w");
+        if (!main_file) {
+            fprintf(stderr, "Error: Cannot create temp file\n");
+            ast_free(ast); parser_free(parser); lexer_free(lexer); free(source);
+            return 1;
+        }
 
-    // Combine files
-    char cmd[512];
-    snprintf(cmd, sizeof(cmd), "cat %s %s > %s", tmp_ll, tmp_main, tmp_combined);
-    if (system(cmd) != 0) {
-        fprintf(stderr, "Error: Failed to combine files\n");
-        ast_free(ast);
-        parser_free(parser);
-        lexer_free(lexer);
-        free(source);
-        return 1;
+        fprintf(main_file, "; Auto-generated main for nerd run\n\n");
+        fprintf(main_file, "@.fmt = private constant [11 x i8] c\"%%s = %%.0f\\0A\\00\"\n");
+        fprintf(main_file, "declare i32 @printf(i8*, ...)\n\n");
+
+        size_t func_count = program->data.program.functions.count;
+        for (size_t i = 0; i < func_count; i++) {
+            ASTNode *func = program->data.program.functions.nodes[i];
+            const char *name = func->data.func_def.name;
+            fprintf(main_file, "@.name%zu = private constant [%zu x i8] c\"%s\\00\"\n", 
+                    i, strlen(name) + 1, name);
+        }
+
+        fprintf(main_file, "\ndefine i32 @main() {\n");
+        fprintf(main_file, "entry:\n");
+
+        for (size_t i = 0; i < func_count; i++) {
+            ASTNode *func = program->data.program.functions.nodes[i];
+            const char *name = func->data.func_def.name;
+            size_t param_count = func->data.func_def.params.count;
+            
+            fprintf(main_file, "  %%r%zu = call double @%s(", i, name);
+            for (size_t j = 0; j < param_count; j++) {
+                if (j > 0) fprintf(main_file, ", ");
+                if (j == 0) fprintf(main_file, "double 5.0");
+                else if (j == 1) fprintf(main_file, "double 3.0");
+                else fprintf(main_file, "double 1.0");
+            }
+            fprintf(main_file, ")\n");
+            
+            fprintf(main_file, "  %%fmt%zu = getelementptr [11 x i8], [11 x i8]* @.fmt, i32 0, i32 0\n", i);
+            fprintf(main_file, "  %%nm%zu = getelementptr [%zu x i8], [%zu x i8]* @.name%zu, i32 0, i32 0\n", 
+                    i, strlen(name) + 1, strlen(name) + 1, i);
+            fprintf(main_file, "  call i32 (i8*, ...) @printf(i8* %%fmt%zu, i8* %%nm%zu, double %%r%zu)\n", i, i, i);
+        }
+
+        fprintf(main_file, "  ret i32 0\n");
+        fprintf(main_file, "}\n");
+        fclose(main_file);
+
+        snprintf(cmd, sizeof(cmd), "cat %s %s > %s", tmp_ll, tmp_main, tmp_combined);
+        if (system(cmd) != 0) {
+            fprintf(stderr, "Error: Failed to combine files\n");
+            ast_free(ast); parser_free(parser); lexer_free(lexer); free(source);
+            return 1;
+        }
     }
 
-    // Compile with clang
-    snprintf(cmd, sizeof(cmd), "clang -w %s -o %s", tmp_combined, tmp_bin);
+    // Build clang command with required libraries
+    // Get path to nerd executable to find runtime libs
+    char exe_path[1024] = "";
+    #ifdef __APPLE__
+    uint32_t size = sizeof(exe_path);
+    _NSGetExecutablePath(exe_path, &size);
+    #else
+    readlink("/proc/self/exe", exe_path, sizeof(exe_path));
+    #endif
+    
+    // Get directory of executable
+    char *last_slash = strrchr(exe_path, '/');
+    if (last_slash) *(last_slash + 1) = '\0';
+    
+    // Build library paths
+    char http_lib[1024], mcp_lib[1024], llm_lib[1024];
+    snprintf(http_lib, sizeof(http_lib), "%sbuild/nerd_http.o", exe_path);
+    snprintf(mcp_lib, sizeof(mcp_lib), "%sbuild/nerd_mcp.o", exe_path);
+    snprintf(llm_lib, sizeof(llm_lib), "%sbuild/nerd_llm.o", exe_path);
+    
+    // Build clang command
+    char libs[2048] = "";
+    if (needs_http || needs_mcp || needs_llm) {
+        strcat(libs, " -lcurl");
+    }
+    if (needs_http) {
+        strcat(libs, " ");
+        strcat(libs, http_lib);
+    }
+    if (needs_mcp) {
+        strcat(libs, " ");
+        strcat(libs, mcp_lib);
+    }
+    if (needs_llm) {
+        strcat(libs, " ");
+        strcat(libs, llm_lib);
+    }
+    
+    snprintf(cmd, sizeof(cmd), "clang -w %s%s -o %s", tmp_combined, libs, tmp_bin);
     if (system(cmd) != 0) {
         fprintf(stderr, "Error: clang compilation failed. Check %s\n", tmp_combined);
         ast_free(ast);

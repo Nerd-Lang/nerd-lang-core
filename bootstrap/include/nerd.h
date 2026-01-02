@@ -85,6 +85,7 @@ typedef enum {
     TOK_HTTP,       // http module
     TOK_JSON,       // json module
     TOK_MCP,        // mcp module (Model Context Protocol)
+    TOK_LLM,        // llm module (Claude, OpenAI, etc.)
 
     // Literals and identifiers
     TOK_NUMBER,     // numeric literal

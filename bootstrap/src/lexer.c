@@ -85,6 +85,7 @@ static const Keyword keywords[] = {
     {"http", TOK_HTTP},
     {"json", TOK_JSON},
     {"mcp", TOK_MCP},
+    {"llm", TOK_LLM},
 
     {NULL, TOK_EOF}
 };

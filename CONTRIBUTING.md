@@ -4,7 +4,7 @@ Thanks for your interest in contributing to NERD! This is an experimental projec
 
 ## Project Philosophy
 
-NERD is designed for LLMs, not humans. Before contributing, understand the core principles:
+NERD is designed for LLMs, not for human authorship. Before contributing, understand the core principles:
 
 1. **Token efficiency over readability** - Every design decision optimizes for fewer tokens
 2. **English words over symbols** - Words tokenize predictably; symbols fragment

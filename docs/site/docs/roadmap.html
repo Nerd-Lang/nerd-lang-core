@@ -57,33 +57,49 @@
       <div class="docs-content">
         <h1>Roadmap</h1>
 
-        <h2>Done</h2>
-        <ul>
-          <li>Bootstrap compiler (C)</li>
-          <li>Lexer, parser, codegen</li>
-          <li>LLVM IR generation</li>
-          <li>Native compilation via clang</li>
-          <li>User-defined functions</li>
-          <li>Math module</li>
-          <li>Cross-platform install</li>
-        </ul>
+        <p style="color: var(--text-dim); margin-bottom: 2rem;">
+          Prioritizing <strong>agent-first</strong> capabilities. See <a href="/agent-first">the story</a> for why.
+        </p>
 
-        <h2>Next</h2>
-        <ul>
-          <li>String operations</li>
-          <li>List operations</li>
-          <li>Better error messages</li>
-          <li>WASM target</li>
-        </ul>
+        <style>
+          .roadmap-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; }
+          .roadmap-table th, .roadmap-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+          .roadmap-table th { color: var(--text-dim); font-weight: 500; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+          .status-done { color: #22c55e; }
+          .status-next { color: var(--accent); }
+          .status-later { color: var(--text-dim); }
+        </style>
 
-        <h2>Later</h2>
-        <ul>
-          <li>Human View generator</li>
-          <li>HTTP client</li>
-          <li>JSON parsing</li>
-          <li>IDE support</li>
-          <li>Fine-tuned models</li>
-        </ul>
+        <table class="roadmap-table">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Bootstrap compiler (C), Lexer, Parser, Codegen</td><td class="status-done">✓ Done</td></tr>
+            <tr><td>LLVM IR generation, native compilation via clang</td><td class="status-done">✓ Done</td></tr>
+            <tr><td>User-defined functions, Math module</td><td class="status-done">✓ Done</td></tr>
+            <tr><td>Control flow (if/else, loops, counters)</td><td class="status-done">✓ Done</td></tr>
+            <tr><td>HTTP module - GET, POST requests</td><td class="status-done">✓ Done</td></tr>
+            <tr><td>LLM module - Claude API calls</td><td class="status-done">✓ Done</td></tr>
+            <tr><td>MCP support - Remote tool discovery and execution</td><td class="status-done">✓ Done</td></tr>
+            <tr><td>Implicit main, .env file support</td><td class="status-done">✓ Done</td></tr>
+            <tr><td>JSON parsing and generation</td><td class="status-next">Coming next</td></tr>
+            <tr><td>String operations (concat, split, extract)</td><td class="status-next">Coming next</td></tr>
+            <tr><td>SSE / HTTP streaming</td><td class="status-next">Coming next</td></tr>
+            <tr><td>OpenAI API support</td><td class="status-next">Coming next</td></tr>
+            <tr><td>Conversation state / multi-turn</td><td class="status-next">Coming next</td></tr>
+            <tr><td>Human View generator</td><td class="status-later">More to explore</td></tr>
+            <tr><td>Context storage, long-term memory</td><td class="status-later">More to explore</td></tr>
+            <tr><td>WASM target, IDE support</td><td class="status-later">More to explore</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Philosophy</h2>
+        <p>We're not chasing feature parity with general-purpose languages. NERD is built for LLMs, not for human authorship. We're building what agents need first, then expanding based on gaps we discover.</p>
+        <p>Read more: <a href="/agent-first">LLM-Native Language Going Agent-First</a></p>
 
         <h2>Contribute</h2>
         <p>See <a href="https://github.com/Nerd-Lang/nerd-lang-core/blob/main/CONTRIBUTING.md" target="_blank">CONTRIBUTING.md</a>.</p>

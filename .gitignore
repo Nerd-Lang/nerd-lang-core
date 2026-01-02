@@ -21,3 +21,4 @@ CLAUDE.md
 
 # Pre-built binaries (now distributed via GitHub Releases)
 /bin/
+examples/.env

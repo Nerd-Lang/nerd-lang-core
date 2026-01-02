@@ -13,7 +13,7 @@ BUILD_DIR = build
 BIN = nerd
 
 # Exclude runtime files from compiler build
-SOURCES = $(filter-out $(SRC_DIR)/nerd_http.c $(SRC_DIR)/nerd_mcp.c, $(wildcard $(SRC_DIR)/*.c))
+SOURCES = $(filter-out $(SRC_DIR)/nerd_http.c $(SRC_DIR)/nerd_mcp.c $(SRC_DIR)/nerd_llm.c, $(wildcard $(SRC_DIR)/*.c))
 OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
 
 # Runtime libraries
@@ -21,6 +21,8 @@ RUNTIME_HTTP_SRC = $(SRC_DIR)/nerd_http.c
 RUNTIME_HTTP_OBJ = $(BUILD_DIR)/nerd_http.o
 RUNTIME_MCP_SRC = $(SRC_DIR)/nerd_mcp.c
 RUNTIME_MCP_OBJ = $(BUILD_DIR)/nerd_mcp.o
+RUNTIME_LLM_SRC = $(SRC_DIR)/nerd_llm.c
+RUNTIME_LLM_OBJ = $(BUILD_DIR)/nerd_llm.o
 
 .PHONY: all clean debug test
 
@@ -74,8 +76,15 @@ runtime-mcp: $(BUILD_DIR) $(RUNTIME_MCP_OBJ)
 $(RUNTIME_MCP_OBJ): $(RUNTIME_MCP_SRC) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+# Build LLM runtime library
+runtime-llm: $(BUILD_DIR) $(RUNTIME_LLM_OBJ)
+	@echo "Built LLM runtime: $(RUNTIME_LLM_OBJ)"
+
+$(RUNTIME_LLM_OBJ): $(RUNTIME_LLM_SRC) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 # Build all runtimes
-runtime-all: runtime runtime-mcp
+runtime-all: runtime runtime-mcp runtime-llm
 	@echo "Built all runtime libraries"
 
 # Compile and link to native executable (requires clang/LLVM)
@@ -95,6 +104,12 @@ native-mcp: $(BIN) runtime runtime-mcp
 	./$(BIN) compile ../examples/mcp_test.nerd -o mcp_test.ll
 	clang mcp_test.ll $(RUNTIME_HTTP_OBJ) $(RUNTIME_MCP_OBJ) -lcurl -o mcp_test
 	@echo "Built MCP-enabled executable: mcp_test"
+
+# Compile with full agent support (MCP + LLM)
+native-agent: $(BIN) runtime-all
+	./$(BIN) compile ../examples/agent.nerd -o agent.ll
+	clang agent.ll $(RUNTIME_HTTP_OBJ) $(RUNTIME_MCP_OBJ) $(RUNTIME_LLM_OBJ) -lcurl -o agent
+	@echo "Built agent executable: agent"
 
 # Install to /usr/local/bin
 install: $(BIN)

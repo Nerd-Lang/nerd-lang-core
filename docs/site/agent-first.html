@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QQ02NMKSR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-QQ02NMKSR7');
+  </script>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/nerd-dark.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM-Native Language Going Agent-First - NERD</title>
+  <meta name="description" content="Why NERD is prioritizing agentic use cases. An LLM-native language built for agents.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .blog-header {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .blog-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    .blog-meta time {
+      color: var(--text-dim);
+    }
+    .author-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--bg);
+    }
+    .vision-update {
+      border-left: 3px solid var(--accent);
+      padding-left: 1.5rem;
+      margin: 2rem 0;
+    }
+    .vision-update time {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .note-box {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.05));
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .note-box::before {
+      content: "💡";
+      margin-right: 0.5rem;
+    }
+    .principle {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 0;
+      align-items: flex-start;
+    }
+    .principle-num {
+      background: var(--accent);
+      color: var(--bg);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="/" class="logo">NERD</a>
+      <ul>
+        <li><a href="/about" class="active">Story</a></li>
+        <li><a href="/docs">Docs</a></li>
+        <li><a href="/team">Authors</a></li>
+        <li>
+          <a href="https://github.com/Nerd-Lang/nerd-lang-core" class="github-link" target="_blank">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <article>
+      <div class="blog-header">
+        <h1>LLM-Native Language Going Agent-First</h1>
+        <div class="blog-meta">
+          <span class="author-avatar">G</span>
+          <span><strong>Guru</strong></span>
+          <span>·</span>
+          <time>January 2026</time>
+        </div>
+      </div>
+
+      <div class="vision-update">
+        
+        <p>We started NERD with a simple premise: <a href="/about#foundation">an LLM-native language</a> - machines write, humans audit. That's still the foundation.</p>
+        
+        <p>But a language needs a use case. So we picked one: <strong>agent-first</strong>.</p>
+
+        <h3>Why Agents</h3>
+        
+        <p>You can build a general-purpose programming language that covers everything. But it's better to start from a use case than be fascinated by technology for its own sake.</p>
+        
+        <p>Looking at where the world is heading:</p>
+        <ul>
+          <li>Organizations are increasingly adopting agents for real workloads</li>
+          <li>Developer tools like Cursor and Claude Code are transforming how we build software</li>
+          <li>MCP is creating a massive ecosystem of reusable tools</li>
+          <li>General-purpose agents are becoming more capable every month</li>
+          <li>Traditional UIs are giving way to chat interfaces and agent-driven experiences</li>
+        </ul>
+
+        <p>And here's the key insight from working deeply with agents and tools over the past months, especially since the announcement of MCP:</p>
+        
+        <div class="highlight-box">
+          <p style="margin: 0;"><strong>Tools are absorbing integration complexity away from agents.</strong></p>
+          <p style="margin: 0.5rem 0 0 0; color: var(--text-dim);">Authentication, API quirks, error handling, retries, rate limiting - all of it is moving into tool providers. What remains for the agent is orchestration.</p>
+        </div>
+
+        <p>For orchestration, there are many options - frameworks like <a href="https://www.langchain.com/" target="_blank">LangChain</a> and <a href="https://www.crewai.com/" target="_blank">CrewAI</a> let you build agents with simple English instructions. They're powerful, well-maintained, and solve real problems.</p>
+        
+        <p>With powerful models like Opus 4.5 and Grok, and developer tools like Cursor and Claude Code, you can also build a solid agent just with your language of choice - no framework required.</p>
+        
+        <p>For an organization starting their agent journey, maybe all they need is one efficient agent for their use case. For that, a plain programming language works fine. But today's agent frameworks are all built using languages that were designed for different purposes.</p>
+
+        <p>That's where NERD is trying to be different:</p>
+
+        <table class="comparison-table" style="max-width: 750px; margin: 1.5rem 0;">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Language</th>
+              <th style="width: 40%;">Originally Built For</th>
+              <th style="width: 35%;">NERD Approach</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Java</strong></td>
+              <td style="color: var(--text-dim);">Enterprise apps, microservices</td>
+              <td rowspan="5" style="vertical-align: middle;">
+                <strong>Agent-first</strong><br><br>
+                <span style="color: var(--text-dim);">Built for LLMs to write</span><br>
+                <span style="color: var(--text-dim);">Evolves with industry needs</span><br>
+                <span style="color: var(--text-dim);">Minimal, purpose-built</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Python</strong></td>
+              <td style="color: var(--text-dim);">Scripting, data science, ML</td>
+            </tr>
+            <tr>
+              <td><strong>TypeScript</strong></td>
+              <td style="color: var(--text-dim);">Web apps, frontend, Node.js</td>
+            </tr>
+            <tr>
+              <td><strong>Go</strong></td>
+              <td style="color: var(--text-dim);">Cloud infrastructure, DevOps</td>
+            </tr>
+            <tr>
+              <td><strong>Rust</strong></td>
+              <td style="color: var(--text-dim);">Systems programming, safety</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>These languages are great at what they were designed for. But when repurposed for agents, they carry dependencies and syntax from their original era.</p>
+        
+        <p>A lighter language that is <strong>LLM-native</strong> and <strong>agent-first</strong> - evolving based on how the industry moves - looks more promising than adapting languages built for different problems.</p>
+
+        <div class="note-box">
+          <strong>What about context storage, long-term memory, vector databases?</strong><br><br>
+          That market is evolving fast - new products are emerging. NERD is still experimental, and we'll need to figure out integrations for the context engineering space and long-term memory as things mature. We'll revisit this as the ecosystem develops.
+        </div>
+
+        <h3>What Agents Actually Need</h3>
+        
+        <p>If you assume tools absorb integrations, what does an agent actually need?</p>
+
+        <div class="principle">
+          <span class="principle-num">1</span>
+          <div>
+            <strong>LLM calls</strong><br>
+            <span style="color: var(--text-dim);">Talk to Claude, GPT, whatever. Get responses. Handle conversations.</span>
+          </div>
+        </div>
+
+        <div class="principle">
+          <span class="principle-num">2</span>
+          <div>
+            <strong>Tool calls</strong><br>
+            <span style="color: var(--text-dim);">MCP, HTTP endpoints. Call tools, get results. The tool handles the complexity.</span>
+          </div>
+        </div>
+
+        <div class="principle">
+          <span class="principle-num">3</span>
+          <div>
+            <strong>Control flow</strong><br>
+            <span style="color: var(--text-dim);">Conditionals, loops, branching. Basic orchestration logic.</span>
+          </div>
+        </div>
+
+        <div class="principle">
+          <span class="principle-num">4</span>
+          <div>
+            <strong>Data handling</strong><br>
+            <span style="color: var(--text-dim);">JSON parsing, string manipulation. The glue between LLM responses and tool inputs.</span>
+          </div>
+        </div>
+
+        <p>That's... not much. And that's the point.</p>
+
+        <h3>What This Looks Like</h3>
+
+        <p>One line of NERD code. That's an agent:</p>
+
+        <pre><code>llm claude "What is Cloudflare Workers? One sentence."</code></pre>
+        <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: -0.5rem;">📄 <code>agent.nerd</code> - Run with: <code>nerd run agent.nerd</code></p>
+
+        <p style="margin-top: 1.5rem;">Two lines that connect to MCP tools:</p>
+
+        <pre><code>mcp tools "https://docs.mcp.cloudflare.com/mcp"
+mcp send "https://docs.mcp.cloudflare.com/mcp" "search_cloudflare_documentation" "{\"query\":\"Workers\"}"</code></pre>
+        <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: -0.5rem;">📄 <code>mcp_test.nerd</code> - Discovers and calls remote tools</p>
+
+        <p style="margin-top: 1.5rem;">No imports. No configuration boilerplate. No framework initialization. Just the intent, directly expressed.</p>
+        
+        <div class="highlight-box">
+          <p style="margin: 0;"><strong>The irony:</strong> We optimized for LLMs, not humans. But the result is <em>more</em> readable than traditional code.</p>
+          <p style="margin: 0.5rem 0 0 0; color: var(--text-dim);">Plain English words. No cryptic symbols. Dense, yes - but paradoxically clear. Just don't try to write it yourself.</p>
+        </div>
+
+        <h3>The Principles</h3>
+
+        <p>The core philosophy, now with sharper focus:</p>
+
+        <table class="comparison-table" style="max-width: 650px;">
+          <thead>
+            <tr>
+              <th>Principle</th>
+              <th>What It Means</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>LLM-native</strong></td>
+              <td>Optimized for machine generation, not human authorship</td>
+              <td style="color: var(--text-dim); font-size: 0.85rem;">unchanged</td>
+            </tr>
+            <tr>
+              <td><strong>Agent-first</strong></td>
+              <td>Prioritize capabilities needed for agentic use cases</td>
+              <td style="color: var(--accent); font-size: 0.85rem;">new focus</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top: 1.5rem;">These aren't in conflict. An agent language written by LLMs, for orchestrating LLM-powered workflows. The snake eating its tail, but productively.</p>
+
+        <h3>What We're Building</h3>
+
+        <p>The priority order, based on this philosophy:</p>
+
+        <table class="comparison-table" style="max-width: 550px;">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>Description</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>HTTP</strong></td>
+              <td>GET, POST requests</td>
+              <td style="color: #22c55e;">✓ Done</td>
+            </tr>
+            <tr>
+              <td><strong>LLM module</strong></td>
+              <td>Claude API calls</td>
+              <td style="color: #22c55e;">✓ Done</td>
+            </tr>
+            <tr>
+              <td><strong>MCP support</strong></td>
+              <td>Remote tool calling</td>
+              <td style="color: #22c55e;">✓ Done</td>
+            </tr>
+            <tr>
+              <td><strong>JSON</strong></td>
+              <td>Parse, generate, extract</td>
+              <td style="color: var(--accent);">Coming next</td>
+            </tr>
+            <tr>
+              <td><strong>SSE/Streaming</strong></td>
+              <td>Real-time responses</td>
+              <td style="color: var(--accent);">Coming next</td>
+            </tr>
+            <tr>
+              <td><strong>Conversation</strong></td>
+              <td>Multi-turn state</td>
+              <td style="color: var(--text-dim);">Future</td>
+            </tr>
+            <tr>
+              <td><strong>Context storage</strong></td>
+              <td>Long-term memory, vectors</td>
+              <td style="color: var(--text-dim);">More to explore</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top: 1rem;">General-purpose features (strings, lists, math) come as needed. But the agent use case drives priorities.</p>
+
+        <h3>SLMs and Embedded</h3>
+        
+        <p>Here's another trend worth watching: <strong>Small Language Models (SLMs)</strong>.</p>
+        
+        <p>As models get smaller and more efficient, they'll run everywhere - edge devices, IoT, embedded systems.</p>
+
+        <div class="note-box">
+          <strong>NERD compiles to native code via LLVM, written in pure C with no dependencies.</strong><br><br>
+          That means NERD agents could run on embedded devices. A thin orchestration layer, natively compiled, coordinating local SLMs with remote tools. No Python runtime. No container. Just a binary.
+        </div>
+        
+        <p style="color: var(--text-dim);">We're not there yet. But the foundation makes it possible.</p>
+
+        <h3>Why a Language?</h3>
+
+        <p>If orchestration becomes thin, why bother with a language at all?</p>
+        
+        <p>Because there's value in having a compiled, auditable artifact:</p>
+        <ul>
+          <li><strong>Compiles to native code</strong> - fast, portable, no runtime</li>
+          <li><strong>Deterministic</strong> - same input, same output</li>
+          <li><strong>Version-controlled</strong> - track changes, review diffs</li>
+          <li><strong>Runs without an LLM</strong> - once compiled, it's just a binary</li>
+        </ul>
+
+        <p>NERD is that layer. A thin, auditable intermediate between human intent and machine execution.</p>
+
+        <h3>Not a Pivot</h3>
+
+        <p>To be clear: <strong>the philosophy hasn't changed</strong>.</p>
+        
+        <p>NERD is still LLM-native - a language machines write, humans audit. Token-efficient. Compiles to native code. Not for human authorship, but human-observable.</p>
+        
+        <p>What's new is using <strong>agents as a hook</strong> to prioritize which use cases we support first. Instead of building a general-purpose language and hoping it finds users, we're starting with the problem space where this matters most.</p>
+        
+        <p>Agents need thin orchestration. NERD provides thin orchestration. The fit is natural.</p>
+
+        <h3>Still an Experiment</h3>
+
+        <p>This is early. Very early.</p>
+        
+        <p>The implementation might change completely. Maybe C isn't the right foundation when non-deterministic agents need different patterns. Maybe we'll need to integrate with existing runtimes. Maybe the whole approach is flawed.</p>
+        
+        <p>But the philosophy feels worth exploring: <strong>an agent-first language, optimized for LLMs to write and humans to audit</strong>.</p>
+        
+        <p>If that resonates, come build with us. If it doesn't work out, at least we tried something different.</p>
+
+        <h3>The Philosophy</h3>
+        
+        <p>To summarize what NERD stands for:</p>
+        
+        <table class="comparison-table" style="max-width: 600px;">
+          <tbody>
+            <tr>
+              <td style="width: 40%;"><strong>LLM-native</strong></td>
+              <td>Machines write it. Optimized for token efficiency and LLM generation.</td>
+            </tr>
+            <tr>
+              <td><strong>Human-observable</strong></td>
+              <td>Humans audit and review, but don't edit directly.</td>
+            </tr>
+            <tr>
+              <td><strong>Agent-first</strong></td>
+              <td>Prioritizes capabilities agents need: LLM calls, tool calls, orchestration.</td>
+            </tr>
+            <tr>
+              <td><strong>Native compilation</strong></td>
+              <td>Compiles via LLVM. No runtime. Just a binary.</td>
+            </tr>
+            <tr>
+              <td><strong>Minimal by design</strong></td>
+              <td>Only the primitives needed. No bloat from languages built for other purposes.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style="color: var(--text-dim); margin-top: 2rem;">There's basic HTTP and LLM scaffolding to play with - far from production-ready, but enough to see where this could go. Lots more to build. <a href="https://github.com/Nerd-Lang/nerd-lang-core" target="_blank">PRs welcome.</a></p>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid var(--border); margin: 3rem 0;">
+
+      <p style="text-align: center; color: var(--text-dim);">
+        ← <a href="/about">Read: The Foundation</a>
+      </p>
+
+      <p style="margin-top: 3rem; text-align: center;">
+        <a href="https://github.com/Nerd-Lang/nerd-lang-core" target="_blank" style="color: var(--text-dim); border: none;">
+          <svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20" style="vertical-align: middle; margin-right: 0.5rem;">
+            <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>Build with us on GitHub
+        </a>
+      </p>
+    </article>
+  </main>
+
+  <footer>
+    <p>
+      NERD | Apache 2.0 |
+      <a href="https://github.com/Nerd-Lang/nerd-lang-core">GitHub</a>
+    </p>
+  </footer>
+</body>
+</html>
+

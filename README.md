@@ -1,6 +1,6 @@
-> 🚧 **Early days.** This is a first step toward LLM-native programming - a language machines write, humans audit. Lots of unknowns ahead: the implementation might change completely, and the experiment itself might not work out. Not ready for real use yet. Ideas and contributions very welcome.
+> 🚧 **Early days.** This is a first step toward LLM-native programming - a language machines write, humans audit. Now focusing on **agent-first** capabilities: LLM calls, MCP tools, thin orchestration. Lots of unknowns ahead. Not ready for real use yet. Ideas and contributions very welcome.
 >
-> If you're into transformers and token optimization, or you miss the days of writing C and assembly - this might be a fun playground.
+> If you're into agents without frameworks, or you miss the days of writing C and assembly - this might be a fun playground.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/Nerd-Lang/nerd-lang-core/main/docs/site/images/nerd-dark.png" alt="NERD" width="400">
@@ -9,7 +9,7 @@
 <h3 align="center">No Effort Required, Done</h3>
 
 <p align="center">
-  An intermediate language for machines, not humans.
+  A language built for LLMs, not for human authorship.
 </p>
 
 ---
@@ -145,17 +145,43 @@ clang -O2 loops.ll -o loops
 
 | Feature | Syntax | Status |
 |---------|--------|--------|
-| Functions | `fn name args... ret value` | Done |
-| Variables | `let x value` | Done |
-| Math | `plus minus times over mod` | Done |
-| Comparison | `eq ne gt lt ge le` | Done |
-| Output | `out value` | Done |
-| Conditionals | `if cond stmt else stmt` | Done |
-| Loops | `repeat n times as i ... done` | Done |
-| While | `while cond ... done` | Done |
-| Negation | `neg x` | Done |
-| Counters | `inc x` / `dec x` | Done |
-| Stdlib | `math sqrt/pow/sin/cos/...` | Done |
+| Functions | `fn name args... ret value` | ✓ Done |
+| Variables | `let x value` | ✓ Done |
+| Math | `plus minus times over mod` | ✓ Done |
+| Comparison | `eq ne gt lt ge le` | ✓ Done |
+| Output | `out value` | ✓ Done |
+| Conditionals | `if cond stmt else stmt` | ✓ Done |
+| Loops | `repeat n times as i ... done` | ✓ Done |
+| While | `while cond ... done` | ✓ Done |
+| Negation | `neg x` | ✓ Done |
+| Counters | `inc x` / `dec x` | ✓ Done |
+| Stdlib | `math sqrt/pow/sin/cos/...` | ✓ Done |
+
+## Agent Capabilities
+
+| Feature | Syntax | Status |
+|---------|--------|--------|
+| HTTP GET | `http get "url"` | ✓ Done |
+| HTTP POST | `http post "url" "body"` | ✓ Done |
+| LLM (Claude) | `llm claude "prompt"` | ✓ Done |
+| MCP Tools | `mcp tools "url"` | ✓ Done |
+| MCP Call | `mcp send "url" "tool" "args"` | ✓ Done |
+| .env support | Auto-loads `ANTHROPIC_API_KEY` | ✓ Done |
+| JSON | `json parse/get/...` | Coming next |
+| Streaming | SSE for real-time responses | Coming next |
+
+**Example agent:**
+```
+-- Agent in NERD
+
+llm claude "What is Cloudflare Workers? One sentence."
+```
+
+Run with: `./nerd run agent.nerd`
+
+> Basic HTTP and LLM scaffolding to experiment with — far from production-ready, but enough to see where this could go. Lots more to build. [Contributions welcome.](https://github.com/Nerd-Lang/nerd-lang-core/blob/main/CONTRIBUTING.md)
+
+See [LLM-Native Language Going Agent-First](https://www.nerd-lang.org/agent-first) for why we're prioritizing agent capabilities.
 
 ## How It Works
 
@@ -179,6 +205,7 @@ clang -O2 loops.ll -o loops
 
 ## Documentation
 
+- [Story](https://www.nerd-lang.org/about) - Why NERD exists and how it's evolving
 - [Specification](https://www.nerd-lang.org/docs/spec) - Language spec and syntax reference
 - [Examples](examples/) - Sample NERD programs
 - [Bootstrap Compiler](bootstrap/) - Native C compiler source
@@ -192,7 +219,7 @@ Traditional languages exist because humans needed to read and write them. Verbos
 But if 40% of code is machine-written today, and that's growing — the verbosity is pure waste. Every token costs money. Every character takes time.
 
 NERD flips the model:
-- **Not human-friendly** — dense, terse, machine-optimized
+- **Not for human authorship** — dense, terse, machine-optimized
 - **Human-observable** — you can audit it, understand it, verify it
 - **Not human-editable** — you describe changes in natural language, machines update the NERD
 
