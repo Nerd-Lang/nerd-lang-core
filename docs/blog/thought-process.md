@@ -479,6 +479,8 @@ Just don't try to write it yourself.
 
 ## Try It Yourself
 
+The full language specification is at [nerd-lang.org/docs/spec](https://www.nerd-lang.org/docs/spec).
+
 The bootstrap compiler is working. It compiles NERD to native binaries via LLVM. Built from scratch in C, no dependencies.
 
 ```bash

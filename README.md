@@ -179,6 +179,7 @@ clang -O2 loops.ll -o loops
 
 ## Documentation
 
+- [Specification](https://www.nerd-lang.org/docs/spec) - Language spec and syntax reference
 - [Examples](examples/) - Sample NERD programs
 - [Bootstrap Compiler](bootstrap/) - Native C compiler source
 
