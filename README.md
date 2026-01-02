@@ -88,7 +88,7 @@ ret err "unknown operation"
 
 ```bash
 # Install
-curl -L https://raw.githubusercontent.com/Nerd-Lang/nerd-lang-core/main/bin/nerd-darwin-arm64 -o nerd
+curl -L https://github.com/Nerd-Lang/nerd-lang-core/releases/latest/download/nerd-darwin-arm64 -o nerd
 chmod +x nerd
 
 # Write a program

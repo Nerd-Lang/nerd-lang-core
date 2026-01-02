@@ -570,6 +570,47 @@ footer a:hover {
   text-align: center;
 }
 
+/* Try CTA */
+.try-cta {
+  margin-top: 4rem;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  background: var(--bg-card);
+}
+
+.try-cta h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.try-cta p {
+  color: var(--text-dim);
+  margin-bottom: 1.5rem;
+}
+
+.github-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.github-cta:hover {
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.03);
+}
+
+.github-cta svg {
+  opacity: 0.8;
+}
+
 /* Responsive nav */
 @media (max-width: 500px) {
   nav .container {
