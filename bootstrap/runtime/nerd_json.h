@@ -5,7 +5,7 @@
 #ifndef NERD_JSON_H
 #define NERD_JSON_H
 
-#include "cjson/cJSON.h"
+#include "../lib/cjson/cJSON.h"
 
 // Use cJSON as our underlying type
 typedef cJSON nerd_json;
