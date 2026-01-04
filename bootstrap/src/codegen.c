@@ -21,11 +21,17 @@ typedef struct {
     char **param_names;
     size_t param_count;
 
-    // Local variables
+    // Local variables (doubles)
     char **local_names;
     int *local_regs;
     size_t local_count;
     size_t local_capacity;
+
+    // Pointer locals (JSON objects, strings)
+    char **ptr_local_names;
+    int *ptr_local_regs;
+    size_t ptr_local_count;
+    size_t ptr_local_capacity;
 
     // String literals (deferred output)
     char **string_literals;
@@ -47,6 +53,9 @@ static CodeGen *codegen_create(FILE *out) {
     cg->local_capacity = 16;
     cg->local_names = malloc(sizeof(char*) * cg->local_capacity);
     cg->local_regs = malloc(sizeof(int) * cg->local_capacity);
+    cg->ptr_local_capacity = 16;
+    cg->ptr_local_names = malloc(sizeof(char*) * cg->ptr_local_capacity);
+    cg->ptr_local_regs = malloc(sizeof(int) * cg->ptr_local_capacity);
     cg->string_capacity = 16;
     cg->string_literals = malloc(sizeof(char*) * cg->string_capacity);
     cg->string_count = 0;
@@ -61,6 +70,11 @@ static void codegen_free(CodeGen *cg) {
     }
     free(cg->local_names);
     free(cg->local_regs);
+    for (size_t i = 0; i < cg->ptr_local_count; i++) {
+        free(cg->ptr_local_names[i]);
+    }
+    free(cg->ptr_local_names);
+    free(cg->ptr_local_regs);
     for (size_t i = 0; i < cg->string_count; i++) {
         free(cg->string_literals[i]);
     }
@@ -124,6 +138,32 @@ static int find_local(CodeGen *cg, const char *name) {
 }
 
 /*
+ * Add pointer local variable (for JSON objects)
+ */
+static void add_ptr_local(CodeGen *cg, const char *name, int reg) {
+    if (cg->ptr_local_count >= cg->ptr_local_capacity) {
+        cg->ptr_local_capacity *= 2;
+        cg->ptr_local_names = realloc(cg->ptr_local_names, sizeof(char*) * cg->ptr_local_capacity);
+        cg->ptr_local_regs = realloc(cg->ptr_local_regs, sizeof(int) * cg->ptr_local_capacity);
+    }
+    cg->ptr_local_names[cg->ptr_local_count] = nerd_strdup(name);
+    cg->ptr_local_regs[cg->ptr_local_count] = reg;
+    cg->ptr_local_count++;
+}
+
+/*
+ * Find pointer local variable
+ */
+static int find_ptr_local(CodeGen *cg, const char *name) {
+    for (size_t i = 0; i < cg->ptr_local_count; i++) {
+        if (strcmp(cg->ptr_local_names[i], name) == 0) {
+            return cg->ptr_local_regs[i];
+        }
+    }
+    return -1;
+}
+
+/*
  * Find parameter index
  */
 static int find_param(CodeGen *cg, const char *name) {
@@ -143,6 +183,10 @@ static void clear_locals(CodeGen *cg) {
         free(cg->local_names[i]);
     }
     cg->local_count = 0;
+    for (size_t i = 0; i < cg->ptr_local_count; i++) {
+        free(cg->ptr_local_names[i]);
+    }
+    cg->ptr_local_count = 0;
     cg->temp_counter = 0;
 }
 
@@ -158,17 +202,20 @@ static void codegen_stmt(CodeGen *cg, ASTNode *node, int *result_reg);
 static void collect_strings_expr(CodeGen *cg, ASTNode *node);
 static void collect_strings_stmt(CodeGen *cg, ASTNode *node);
 
+static void add_string_literal(CodeGen *cg, const char *str) {
+    if (cg->string_count >= cg->string_capacity) {
+        cg->string_capacity *= 2;
+        cg->string_literals = realloc(cg->string_literals,
+            sizeof(char*) * cg->string_capacity);
+    }
+    cg->string_literals[cg->string_count++] = nerd_strdup(str);
+}
+
 static void collect_strings_expr(CodeGen *cg, ASTNode *node) {
     if (!node) return;
 
     if (node->type == NODE_STR) {
-        // Add string to collection
-        if (cg->string_count >= cg->string_capacity) {
-            cg->string_capacity *= 2;
-            cg->string_literals = realloc(cg->string_literals,
-                sizeof(char*) * cg->string_capacity);
-        }
-        cg->string_literals[cg->string_count++] = nerd_strdup(node->data.str.value);
+        add_string_literal(cg, node->data.str.value);
     } else if (node->type == NODE_BINOP) {
         collect_strings_expr(cg, node->data.binop.left);
         collect_strings_expr(cg, node->data.binop.right);
@@ -178,6 +225,17 @@ static void collect_strings_expr(CodeGen *cg, ASTNode *node) {
         for (size_t i = 0; i < node->data.call.args.count; i++) {
             collect_strings_expr(cg, node->data.call.args.nodes[i]);
         }
+    } else if (node->type == NODE_JSON_ACCESS) {
+        add_string_literal(cg, node->data.json_access.path);
+        collect_strings_expr(cg, node->data.json_access.object);
+    } else if (node->type == NODE_JSON_HAS) {
+        add_string_literal(cg, node->data.json_has.path);
+        collect_strings_expr(cg, node->data.json_has.object);
+    } else if (node->type == NODE_JSON_COUNT) {
+        if (node->data.json_count.path) {
+            add_string_literal(cg, node->data.json_count.path);
+        }
+        collect_strings_expr(cg, node->data.json_count.object);
     }
 }
 
@@ -213,6 +271,10 @@ static void collect_strings_stmt(CodeGen *cg, ASTNode *node) {
             for (size_t i = 0; i < node->data.while_loop.body.count; i++) {
                 collect_strings_stmt(cg, node->data.while_loop.body.nodes[i]);
             }
+            break;
+        case NODE_JSON_SET:
+            add_string_literal(cg, node->data.json_set.key);
+            collect_strings_expr(cg, node->data.json_set.value);
             break;
         default:
             break;
@@ -686,6 +748,97 @@ static int codegen_expr(CodeGen *cg, ASTNode *node) {
             return result_reg;
         }
 
+        case NODE_JSON_NEW: {
+            // Create new empty JSON object
+            int result_reg = next_temp(cg);
+            fprintf(cg->out, "  %%t%d = call i8* @nerd_json_new()\n", result_reg);
+            return result_reg;
+        }
+
+        case NODE_JSON_ACCESS: {
+            // obj."path" - get value from JSON
+            int obj_reg;
+            
+            // Check if object is a pointer local (JSON variable)
+            if (node->data.json_access.object->type == NODE_VAR) {
+                const char *var_name = node->data.json_access.object->data.var.name;
+                int ptr_local = find_ptr_local(cg, var_name);
+                if (ptr_local >= 0) {
+                    // Load pointer from pointer local
+                    obj_reg = next_temp(cg);
+                    fprintf(cg->out, "  %%t%d = load i8*, i8** %%plocal%d\n", obj_reg, ptr_local);
+                } else {
+                    // Fall back to normal expression evaluation
+                    obj_reg = codegen_expr(cg, node->data.json_access.object);
+                }
+            } else {
+                obj_reg = codegen_expr(cg, node->data.json_access.object);
+            }
+            if (obj_reg < 0) return -1;
+
+            // Use pre-collected string index
+            int path_idx = cg->string_counter++;
+            size_t path_len = strlen(node->data.json_access.path) + 1;
+            int path_ptr = next_temp(cg);
+            fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                    path_ptr, path_len, path_len, path_idx);
+
+            // Call get_number by default (we'll need type inference later)
+            int result_reg = next_temp(cg);
+            fprintf(cg->out, "  %%t%d = call double @nerd_json_get_number(i8* %%t%d, i8* %%t%d)\n",
+                    result_reg, obj_reg, path_ptr);
+            return result_reg;
+        }
+
+        case NODE_JSON_HAS: {
+            // obj?"key" - check if key exists
+            int obj_reg = codegen_expr(cg, node->data.json_has.object);
+            if (obj_reg < 0) return -1;
+
+            int path_idx = cg->string_counter++;
+            size_t path_len = strlen(node->data.json_has.path) + 1;
+            int path_ptr = next_temp(cg);
+            fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                    path_ptr, path_len, path_len, path_idx);
+
+            int has_reg = next_temp(cg);
+            fprintf(cg->out, "  %%t%d = call i32 @nerd_json_has(i8* %%t%d, i8* %%t%d)\n",
+                    has_reg, obj_reg, path_ptr);
+
+            // Convert to double for NERD's type system
+            int result_reg = next_temp(cg);
+            fprintf(cg->out, "  %%t%d = sitofp i32 %%t%d to double\n", result_reg, has_reg);
+            return result_reg;
+        }
+
+        case NODE_JSON_COUNT: {
+            // obj."path".count - get array length
+            int obj_reg = codegen_expr(cg, node->data.json_count.object);
+            if (obj_reg < 0) return -1;
+
+            int path_ptr;
+            if (node->data.json_count.path) {
+                int path_idx = cg->string_counter++;
+                size_t path_len = strlen(node->data.json_count.path) + 1;
+                path_ptr = next_temp(cg);
+                fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                        path_ptr, path_len, path_len, path_idx);
+            } else {
+                // NULL path for root level
+                path_ptr = next_temp(cg);
+                fprintf(cg->out, "  %%t%d = inttoptr i64 0 to i8*\n", path_ptr);
+            }
+
+            int count_reg = next_temp(cg);
+            fprintf(cg->out, "  %%t%d = call i32 @nerd_json_count(i8* %%t%d, i8* %%t%d)\n",
+                    count_reg, obj_reg, path_ptr);
+
+            // Convert to double
+            int result_reg = next_temp(cg);
+            fprintf(cg->out, "  %%t%d = sitofp i32 %%t%d to double\n", result_reg, count_reg);
+            return result_reg;
+        }
+
         default:
             fprintf(stderr, "Error: Unknown expression node type %d\n", node->type);
             return -1;
@@ -761,6 +914,119 @@ static void codegen_stmt(CodeGen *cg, ASTNode *node, int *result_reg) {
         }
 
         case NODE_LET: {
+            // Check if this is a JSON new (let x {})
+            if (node->data.let.value->type == NODE_JSON_NEW) {
+                int json_reg = next_temp(cg);
+                fprintf(cg->out, "  %%t%d = call i8* @nerd_json_new()\n", json_reg);
+                
+                // Store as pointer local
+                int ptr_local_id = (int)cg->ptr_local_count;
+                fprintf(cg->out, "  %%plocal%d = alloca i8*\n", ptr_local_id);
+                fprintf(cg->out, "  store i8* %%t%d, i8** %%plocal%d\n", json_reg, ptr_local_id);
+                add_ptr_local(cg, node->data.let.name, ptr_local_id);
+                break;
+            }
+
+            // Check if this is an HTTP call (let x http get "url")
+            ASTNode *val = node->data.let.value;
+            if (val->type == NODE_CALL && val->data.call.module &&
+                strcmp(val->data.call.module, "http") == 0 &&
+                val->data.call.args.count >= 1) {
+                
+                ASTNode *url_node = val->data.call.args.nodes[0];
+                
+                if (strcmp(val->data.call.func, "get") == 0 && url_node->type == NODE_STR) {
+                    // let x http get "url" -> store JSON response
+                    int url_idx = cg->string_counter++;
+                    if (cg->string_count >= cg->string_capacity) {
+                        cg->string_capacity *= 2;
+                        cg->string_literals = realloc(cg->string_literals,
+                            sizeof(char*) * cg->string_capacity);
+                    }
+                    cg->string_literals[cg->string_count++] = nerd_strdup(url_node->data.str.value);
+
+                    size_t url_len = actual_string_len(url_node->data.str.value) + 1;
+                    int url_ptr = next_temp(cg);
+                    fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                            url_ptr, url_len, url_len, url_idx);
+
+                    // Call http_get_json
+                    int json_reg = next_temp(cg);
+                    fprintf(cg->out, "  %%t%d = call i8* @nerd_http_get_json(i8* %%t%d)\n", json_reg, url_ptr);
+
+                    // Store as pointer local
+                    int ptr_local_id = (int)cg->ptr_local_count;
+                    fprintf(cg->out, "  %%plocal%d = alloca i8*\n", ptr_local_id);
+                    fprintf(cg->out, "  store i8* %%t%d, i8** %%plocal%d\n", json_reg, ptr_local_id);
+                    add_ptr_local(cg, node->data.let.name, ptr_local_id);
+                    break;
+                }
+
+                if (strcmp(val->data.call.func, "post") == 0 && 
+                    val->data.call.args.count >= 2 &&
+                    url_node->type == NODE_STR) {
+                    // let x http post "url" body
+                    ASTNode *body_node = val->data.call.args.nodes[1];
+                    
+                    int url_idx = cg->string_counter++;
+                    if (cg->string_count >= cg->string_capacity) {
+                        cg->string_capacity *= 2;
+                        cg->string_literals = realloc(cg->string_literals,
+                            sizeof(char*) * cg->string_capacity);
+                    }
+                    cg->string_literals[cg->string_count++] = nerd_strdup(url_node->data.str.value);
+
+                    size_t url_len = actual_string_len(url_node->data.str.value) + 1;
+                    int url_ptr = next_temp(cg);
+                    fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                            url_ptr, url_len, url_len, url_idx);
+
+                    int json_reg;
+                    if (body_node->type == NODE_STR) {
+                        // String body
+                        int body_idx = cg->string_counter++;
+                        if (cg->string_count >= cg->string_capacity) {
+                            cg->string_capacity *= 2;
+                            cg->string_literals = realloc(cg->string_literals,
+                                sizeof(char*) * cg->string_capacity);
+                        }
+                        cg->string_literals[cg->string_count++] = nerd_strdup(body_node->data.str.value);
+
+                        size_t body_len = actual_string_len(body_node->data.str.value) + 1;
+                        int body_ptr = next_temp(cg);
+                        fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                body_ptr, body_len, body_len, body_idx);
+
+                        json_reg = next_temp(cg);
+                        fprintf(cg->out, "  %%t%d = call i8* @nerd_http_post_json(i8* %%t%d, i8* %%t%d)\n",
+                                json_reg, url_ptr, body_ptr);
+                    } else if (body_node->type == NODE_VAR) {
+                        // Variable body (check if it's a JSON object)
+                        int ptr_local = find_ptr_local(cg, body_node->data.var.name);
+                        if (ptr_local >= 0) {
+                            int body_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = load i8*, i8** %%plocal%d\n", body_ptr, ptr_local);
+                            json_reg = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_http_post_json_body(i8* %%t%d, i8* %%t%d)\n",
+                                    json_reg, url_ptr, body_ptr);
+                        } else {
+                            fprintf(stderr, "Error: HTTP POST body must be a string or JSON object\n");
+                            return;
+                        }
+                    } else {
+                        fprintf(stderr, "Error: HTTP POST body must be a string or JSON object\n");
+                        return;
+                    }
+
+                    // Store as pointer local
+                    int ptr_local_id = (int)cg->ptr_local_count;
+                    fprintf(cg->out, "  %%plocal%d = alloca i8*\n", ptr_local_id);
+                    fprintf(cg->out, "  store i8* %%t%d, i8** %%plocal%d\n", json_reg, ptr_local_id);
+                    add_ptr_local(cg, node->data.let.name, ptr_local_id);
+                    break;
+                }
+            }
+            
             int val_reg = codegen_expr(cg, node->data.let.value);
             if (val_reg < 0) return;
 
@@ -918,6 +1184,61 @@ static void codegen_stmt(CodeGen *cg, ASTNode *node, int *result_reg) {
             break;
         }
 
+        case NODE_JSON_SET: {
+            // x."key" = value - set value in JSON object
+            
+            // Get the JSON object pointer
+            int obj_reg;
+            if (node->data.json_set.object->type == NODE_VAR) {
+                const char *var_name = node->data.json_set.object->data.var.name;
+                int ptr_local = find_ptr_local(cg, var_name);
+                if (ptr_local >= 0) {
+                    obj_reg = next_temp(cg);
+                    fprintf(cg->out, "  %%t%d = load i8*, i8** %%plocal%d\n", obj_reg, ptr_local);
+                } else {
+                    fprintf(stderr, "Error: '%s' is not a JSON object\n", var_name);
+                    return;
+                }
+            } else {
+                fprintf(stderr, "Error: JSON set requires a variable\n");
+                return;
+            }
+
+            // Get key string (pre-collected)
+            int key_idx = cg->string_counter++;
+            size_t key_len = strlen(node->data.json_set.key) + 1;
+            int key_ptr = next_temp(cg);
+            fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                    key_ptr, key_len, key_len, key_idx);
+
+            // Get value
+            ASTNode *val = node->data.json_set.value;
+            if (val->type == NODE_STR) {
+                // String value (pre-collected)
+                int val_idx = cg->string_counter++;
+                size_t val_len = actual_string_len(val->data.str.value) + 1;
+                int val_ptr = next_temp(cg);
+                fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                        val_ptr, val_len, val_len, val_idx);
+
+                fprintf(cg->out, "  call void @nerd_json_set_string(i8* %%t%d, i8* %%t%d, i8* %%t%d)\n",
+                        obj_reg, key_ptr, val_ptr);
+            } else if (val->type == NODE_BOOL) {
+                // Boolean value
+                int bool_val = val->data.boolean.value ? 1 : 0;
+                fprintf(cg->out, "  call void @nerd_json_set_bool(i8* %%t%d, i8* %%t%d, i32 %d)\n",
+                        obj_reg, key_ptr, bool_val);
+            } else {
+                // Numeric value
+                int val_reg = codegen_expr(cg, val);
+                if (val_reg >= 0) {
+                    fprintf(cg->out, "  call void @nerd_json_set_number(i8* %%t%d, i8* %%t%d, double %%t%d)\n",
+                            obj_reg, key_ptr, val_reg);
+                }
+            }
+            break;
+        }
+
         case NODE_OUT: {
             ASTNode *val = node->data.out.value;
 
@@ -1035,6 +1356,9 @@ bool codegen_llvm(NerdContext *ctx, const char *output_path) {
     fprintf(out, "declare i8* @nerd_http_get(i8*)\n");
     fprintf(out, "declare i8* @nerd_http_post(i8*, i8*)\n");
     fprintf(out, "declare void @nerd_http_free(i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_get_json(i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_post_json(i8*, i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_post_json_body(i8*, i8*)\n");
     fprintf(out, "\n");
 
     // MCP runtime declarations
@@ -1047,6 +1371,23 @@ bool codegen_llvm(NerdContext *ctx, const char *output_path) {
     // LLM runtime declarations
     fprintf(out, "declare i8* @nerd_llm_claude(i8*)\n");
     fprintf(out, "declare void @nerd_llm_free(i8*)\n");
+    fprintf(out, "\n");
+
+    // JSON runtime declarations
+    fprintf(out, "declare i8* @nerd_json_new()\n");
+    fprintf(out, "declare i8* @nerd_json_parse(i8*)\n");
+    fprintf(out, "declare i8* @nerd_json_get_string(i8*, i8*)\n");
+    fprintf(out, "declare double @nerd_json_get_number(i8*, i8*)\n");
+    fprintf(out, "declare i32 @nerd_json_get_bool(i8*, i8*)\n");
+    fprintf(out, "declare i8* @nerd_json_get_object(i8*, i8*)\n");
+    fprintf(out, "declare i32 @nerd_json_count(i8*, i8*)\n");
+    fprintf(out, "declare i32 @nerd_json_has(i8*, i8*)\n");
+    fprintf(out, "declare void @nerd_json_set_string(i8*, i8*, i8*)\n");
+    fprintf(out, "declare void @nerd_json_set_number(i8*, i8*, double)\n");
+    fprintf(out, "declare void @nerd_json_set_bool(i8*, i8*, i32)\n");
+    fprintf(out, "declare i8* @nerd_json_stringify(i8*)\n");
+    fprintf(out, "declare void @nerd_json_free(i8*)\n");
+    fprintf(out, "declare void @nerd_json_free_string(i8*)\n");
     fprintf(out, "\n");
 
     // Format strings for output

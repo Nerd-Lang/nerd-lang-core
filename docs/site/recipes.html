@@ -306,6 +306,35 @@ ret a plus b</code></pre>
         </div>
       </div>
 
+      <!-- JSON -->
+      <div class="category">
+        <h2>JSON</h2>
+        
+        <div class="recipe-card" data-prompt="Fetch a GitHub user and print their follower count">
+          <div class="recipe-grid">
+            <div class="recipe-prompt">
+              <div class="recipe-label">Prompt</div>
+              <p class="prompt-text">"Fetch a GitHub user and print their follower count. <span class="llm-link">Use https://nerd-lang.org/llms.txt for syntax.</span>"</p>
+            </div>
+            <div class="recipe-code">
+              <div class="file-header">
+                <span class="file-icon">📄</span>
+                <span class="file-name">github.nerd</span>
+              </div>
+              <pre><code>let user http get "https://api.github.com/users/octocat"
+out user."followers"</code></pre>
+            </div>
+          </div>
+          <div class="recipe-footer">
+            <span class="recipe-stats">2 lines · 10 tokens</span>
+            <div class="recipe-actions">
+              <label class="include-link"><input type="checkbox" checked onchange="toggleLink(this)"> Include llms.txt</label>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <p style="text-align: center; color: var(--text-dim); margin-top: 3rem;">
         <a href="/docs">Get started</a> · <a href="https://github.com/Nerd-Lang/nerd-lang-core/tree/main/examples">More examples on GitHub</a>
       </p>

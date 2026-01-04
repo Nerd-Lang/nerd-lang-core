@@ -36,6 +36,14 @@ typedef enum {
     TOK_NEG,        // neg - negation
     TOK_INC,        // inc - increment
     TOK_DEC,        // dec - decrement
+    TOK_COUNT,      // count - array length
+
+    // JSON/Object operators
+    TOK_LBRACE,     // {
+    TOK_RBRACE,     // }
+    TOK_DOT,        // .
+    TOK_QUESTION,   // ?
+    TOK_ASSIGN,     // =
 
     // Types
     TOK_NUM,        // num - f64
@@ -148,6 +156,11 @@ typedef enum {
     NODE_BOOL,
     NODE_VAR,
     NODE_POSITIONAL,
+    NODE_JSON_NEW,      // let x {}
+    NODE_JSON_ACCESS,   // x."path"
+    NODE_JSON_HAS,      // x?"key"
+    NODE_JSON_COUNT,    // x."path".count
+    NODE_JSON_SET,      // x."key" = value
 } NodeType;
 
 /*
@@ -300,6 +313,31 @@ struct ASTNode {
         struct {
             int index;          // 0=first, 1=second, etc.
         } positional;
+
+        // JSON access (x."path")
+        struct {
+            ASTNode *object;    // The JSON object being accessed
+            char *path;         // The path string (e.g., "user.name" or "items[0]")
+        } json_access;
+
+        // JSON has check (x?"key")
+        struct {
+            ASTNode *object;
+            char *path;
+        } json_has;
+
+        // JSON count (x."path".count)
+        struct {
+            ASTNode *object;
+            char *path;         // Path to array (can be NULL for root)
+        } json_count;
+
+        // JSON set (x."key" = value)
+        struct {
+            ASTNode *object;
+            char *key;
+            ASTNode *value;
+        } json_set;
     } data;
 };
 

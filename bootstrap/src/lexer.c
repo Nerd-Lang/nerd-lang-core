@@ -36,6 +36,7 @@ static const Keyword keywords[] = {
     {"neg", TOK_NEG},
     {"inc", TOK_INC},
     {"dec", TOK_DEC},
+    {"count", TOK_COUNT},
 
     // Types
     {"num", TOK_NUM},
@@ -315,6 +316,33 @@ bool lexer_tokenize(Lexer *lexer) {
         // Words (keywords and identifiers)
         if (is_alpha(c)) {
             if (!lexer_scan_word(lexer)) return false;
+            continue;
+        }
+
+        // Single-character tokens for JSON operations
+        if (c == '{') {
+            lexer_add_token(lexer, TOK_LBRACE, "{", 1);
+            lexer_advance(lexer);
+            continue;
+        }
+        if (c == '}') {
+            lexer_add_token(lexer, TOK_RBRACE, "}", 1);
+            lexer_advance(lexer);
+            continue;
+        }
+        if (c == '.') {
+            lexer_add_token(lexer, TOK_DOT, ".", 1);
+            lexer_advance(lexer);
+            continue;
+        }
+        if (c == '?') {
+            lexer_add_token(lexer, TOK_QUESTION, "?", 1);
+            lexer_advance(lexer);
+            continue;
+        }
+        if (c == '=') {
+            lexer_add_token(lexer, TOK_ASSIGN, "=", 1);
+            lexer_advance(lexer);
             continue;
         }
 

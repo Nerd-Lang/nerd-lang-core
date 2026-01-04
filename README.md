@@ -167,7 +167,8 @@ clang -O2 loops.ll -o loops
 | MCP Tools | `mcp tools "url"` | ✓ Done |
 | MCP Call | `mcp send "url" "tool" "args"` | ✓ Done |
 | .env support | Auto-loads `ANTHROPIC_API_KEY` | ✓ Done |
-| JSON | `json parse/get/...` | Coming next |
+| JSON Access | `obj."path"`, `obj?"key"` | ✓ Done |
+| JSON Create | `let x {}`, `x."key" = val` | ✓ Done |
 | Streaming | SSE for real-time responses | Coming next |
 
 **Example agent:**
@@ -175,6 +176,14 @@ clang -O2 loops.ll -o loops
 -- Agent in NERD
 
 llm claude "What is Cloudflare Workers? One sentence."
+```
+
+**JSON from HTTP:**
+```
+-- Fetch and access JSON
+let user http get "https://api.github.com/users/octocat"
+out user."login"
+out user."followers"
 ```
 
 Run with: `./nerd run agent.nerd`

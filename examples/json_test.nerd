@@ -1,0 +1,19 @@
+# JSON Test - demonstrates JSON operations in NERD
+
+# Fetch JSON from GitHub API
+let user http get "https://api.github.com/users/octocat"
+
+# Access values with dot notation
+out user."login"
+out user."id"
+out user."public_repos"
+out user."followers"
+
+# Create a new JSON object
+let payload {}
+payload."title" = "Test Issue"
+payload."body" = "This is a test"
+payload."priority" = 1
+
+out "Created JSON object"
+

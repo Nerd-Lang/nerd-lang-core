@@ -101,6 +101,26 @@ void ast_free(ASTNode *node) {
         case NODE_VAR:
             free(node->data.var.name);
             break;
+        case NODE_JSON_NEW:
+            // No additional data to free
+            break;
+        case NODE_JSON_ACCESS:
+            ast_free(node->data.json_access.object);
+            free(node->data.json_access.path);
+            break;
+        case NODE_JSON_HAS:
+            ast_free(node->data.json_has.object);
+            free(node->data.json_has.path);
+            break;
+        case NODE_JSON_COUNT:
+            ast_free(node->data.json_count.object);
+            free(node->data.json_count.path);
+            break;
+        case NODE_JSON_SET:
+            ast_free(node->data.json_set.object);
+            free(node->data.json_set.key);
+            ast_free(node->data.json_set.value);
+            break;
         default:
             break;
     }
@@ -236,7 +256,8 @@ static bool is_end_of_expr(Parser *parser) {
            t == TOK_OR || t == TOK_RET || t == TOK_LET ||
            t == TOK_IF || t == TOK_ELSE || t == TOK_CALL ||
            t == TOK_OUT || t == TOK_DONE || t == TOK_REPEAT ||
-           t == TOK_TIMES || t == TOK_AS || t == TOK_WHILE;
+           t == TOK_TIMES || t == TOK_AS || t == TOK_WHILE ||
+           t == TOK_ASSIGN || t == TOK_RBRACE;
 }
 
 /*
@@ -296,6 +317,7 @@ static ASTNode *parse_expr(Parser *parser);
 static ASTNode *parse_stmt(Parser *parser);
 static ASTNode *parse_inline_stmt(Parser *parser);
 static ASTNode *parse_unary(Parser *parser);
+static ASTNode *parse_postfix(Parser *parser);
 
 /*
  * Parse primary expression
@@ -364,6 +386,80 @@ static ASTNode *parse_primary(Parser *parser) {
 }
 
 /*
+ * Parse postfix operations: obj."path", obj?"key", obj."path".count
+ */
+static ASTNode *parse_postfix(Parser *parser) {
+    ASTNode *left = parse_primary(parser);
+    if (!left) return NULL;
+
+    int line = parser_current(parser)->line;
+
+    // Handle chained postfix operations
+    while (parser_check(parser, TOK_DOT) || parser_check(parser, TOK_QUESTION)) {
+        // JSON access: obj."path"
+        if (parser_match(parser, TOK_DOT)) {
+            // Expect a string literal for the path
+            if (!parser_check(parser, TOK_STRING)) {
+                // Check for .count suffix
+                if (parser_match(parser, TOK_COUNT)) {
+                    // obj.count (count of root array) or after json_access.count
+                    ASTNode *count_node = ast_create(NODE_JSON_COUNT, line);
+                    count_node->data.json_count.object = left;
+                    count_node->data.json_count.path = NULL;  // Root level count
+                    left = count_node;
+                    continue;
+                }
+                fprintf(stderr, "Error at line %d: Expected string path after '.'\n", line);
+                ast_free(left);
+                return NULL;
+            }
+
+            Token *path_tok = parser_advance(parser);
+            
+            // Check if followed by .count
+            if (parser_check(parser, TOK_DOT)) {
+                // Peek ahead to see if it's .count
+                size_t saved_pos = parser->pos;
+                parser_advance(parser);  // consume .
+                if (parser_match(parser, TOK_COUNT)) {
+                    // obj."path".count
+                    ASTNode *count_node = ast_create(NODE_JSON_COUNT, line);
+                    count_node->data.json_count.object = left;
+                    count_node->data.json_count.path = nerd_strdup(path_tok->value);
+                    left = count_node;
+                    continue;
+                } else {
+                    // Restore position - it's a chained access
+                    parser->pos = saved_pos;
+                }
+            }
+
+            // Regular JSON access
+            ASTNode *access_node = ast_create(NODE_JSON_ACCESS, line);
+            access_node->data.json_access.object = left;
+            access_node->data.json_access.path = nerd_strdup(path_tok->value);
+            left = access_node;
+        }
+        // JSON has: obj?"key"
+        else if (parser_match(parser, TOK_QUESTION)) {
+            if (!parser_check(parser, TOK_STRING)) {
+                fprintf(stderr, "Error at line %d: Expected string key after '?'\n", line);
+                ast_free(left);
+                return NULL;
+            }
+
+            Token *key_tok = parser_advance(parser);
+            ASTNode *has_node = ast_create(NODE_JSON_HAS, line);
+            has_node->data.json_has.object = left;
+            has_node->data.json_has.path = nerd_strdup(key_tok->value);
+            left = has_node;
+        }
+    }
+
+    return left;
+}
+
+/*
  * Parse function call (module call or user-defined function call)
  */
 static ASTNode *parse_call(Parser *parser) {
@@ -416,7 +512,7 @@ static ASTNode *parse_call(Parser *parser) {
         return node;
     }
 
-    return parse_primary(parser);
+    return parse_postfix(parser);
 }
 
 /*
@@ -856,10 +952,23 @@ static ASTNode *parse_stmt(Parser *parser) {
 
         ASTNode *node = ast_create(NODE_LET, line);
         node->data.let.name = nerd_strdup(name_tok->value);
-        node->data.let.value = parse_expr(parser);
-        if (!node->data.let.value) {
-            ast_free(node);
-            return NULL;
+
+        // Check for {} (empty JSON object)
+        if (parser_check(parser, TOK_LBRACE)) {
+            parser_advance(parser);  // consume {
+            if (!parser_expect(parser, TOK_RBRACE, "Expected '}' after '{'")) {
+                ast_free(node);
+                return NULL;
+            }
+            // Create a JSON_NEW node
+            ASTNode *json_new = ast_create(NODE_JSON_NEW, line);
+            node->data.let.value = json_new;
+        } else {
+            node->data.let.value = parse_expr(parser);
+            if (!node->data.let.value) {
+                ast_free(node);
+                return NULL;
+            }
         }
 
         parser_match(parser, TOK_NEWLINE);
@@ -950,6 +1059,44 @@ static ASTNode *parse_stmt(Parser *parser) {
         parser_match(parser, TOK_NEWLINE);
 
         return node;
+    }
+
+    // JSON set statement: identifier."key" = value
+    // Check if this looks like a JSON set (identifier followed by . and string)
+    if (parser_check(parser, TOK_IDENT)) {
+        // Peek ahead to see if it's a JSON set
+        size_t saved_pos = parser->pos;
+        Token *var_tok = parser_advance(parser);
+        
+        if (parser_check(parser, TOK_DOT)) {
+            parser_advance(parser);  // consume .
+            if (parser_check(parser, TOK_STRING)) {
+                Token *key_tok = parser_advance(parser);
+                if (parser_check(parser, TOK_ASSIGN)) {
+                    parser_advance(parser);  // consume =
+                    
+                    // This is a JSON set statement
+                    ASTNode *value = parse_expr(parser);
+                    if (!value) {
+                        return NULL;
+                    }
+                    
+                    ASTNode *var_node = ast_create(NODE_VAR, line);
+                    var_node->data.var.name = nerd_strdup(var_tok->value);
+                    
+                    ASTNode *node = ast_create(NODE_JSON_SET, line);
+                    node->data.json_set.object = var_node;
+                    node->data.json_set.key = nerd_strdup(key_tok->value);
+                    node->data.json_set.value = value;
+                    
+                    parser_match(parser, TOK_NEWLINE);
+                    return node;
+                }
+            }
+        }
+        
+        // Restore position - it's not a JSON set
+        parser->pos = saved_pos;
     }
 
     // Expression statement

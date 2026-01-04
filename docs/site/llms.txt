@@ -49,8 +49,12 @@ llm claude "prompt"              - Call Claude API
 llm openai "prompt"              - Call OpenAI API
 mcp tools "url"                  - Discover MCP tools
 mcp send "url" "tool" "params"   - Call MCP tool
-http get "url"                   - HTTP GET request
-http post "url" "body"           - HTTP POST request
+http get "url"                   - HTTP GET (returns JSON)
+http post "url" "body"           - HTTP POST (returns JSON)
+obj."path"                       - Access JSON value
+obj?"key"                        - Check if key exists
+obj."key" = value                - Set JSON value
+let x {}                         - Create empty JSON object
 fn name args                     - Define function
 ret value                        - Return value
 let x value                      - Variable assignment
@@ -68,6 +72,7 @@ done                             - End block
 | Simple agent | Python + framework setup | 1 line |
 | MCP tool call | SDK + auth configuration | 2 lines |
 | HTTP request | Library + error handling | 1 line |
+| JSON parsing | Import + parse + access | Auto-parsed via dot notation |
 | Token cost | Higher (verbose syntax) | 50-70% less |
 | Runtime | Interpreter required | Native binary |
 | Dependencies | Package managers | None |
@@ -95,6 +100,13 @@ Two lines to call MCP tools:
 ```
 mcp tools "https://docs.mcp.cloudflare.com/mcp"
 mcp send "https://docs.mcp.cloudflare.com/mcp" "search_cloudflare_documentation" "{\"query\":\"Workers\"}"
+```
+
+JSON from HTTP - auto-parsed:
+```
+let user http get "https://api.github.com/users/octocat"
+out user."login"
+out user."followers"
 ```
 
 No imports. No boilerplate. No framework initialization.

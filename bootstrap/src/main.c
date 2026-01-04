@@ -112,6 +112,12 @@ static const char *token_name(TokenType type) {
         case TOK_JSON: return "JSON";
         case TOK_MCP: return "MCP";
         case TOK_LLM: return "LLM";
+        case TOK_COUNT: return "COUNT";
+        case TOK_LBRACE: return "LBRACE";
+        case TOK_RBRACE: return "RBRACE";
+        case TOK_DOT: return "DOT";
+        case TOK_QUESTION: return "QUESTION";
+        case TOK_ASSIGN: return "ASSIGN";
         case TOK_NUMBER: return "NUMBER";
         case TOK_STRING: return "STRING";
         case TOK_IDENT: return "IDENT";
@@ -612,17 +618,24 @@ static int cmd_run(int argc, char **argv) {
     if (last_slash) *(last_slash + 1) = '\0';
     
     // Build library paths
-    char http_lib[1024], mcp_lib[1024], llm_lib[1024];
+    char cjson_lib[1024], json_lib[1024], http_lib[1024], mcp_lib[1024], llm_lib[1024];
+    snprintf(cjson_lib, sizeof(cjson_lib), "%sbuild/cJSON.o", exe_path);
+    snprintf(json_lib, sizeof(json_lib), "%sbuild/nerd_json.o", exe_path);
     snprintf(http_lib, sizeof(http_lib), "%sbuild/nerd_http.o", exe_path);
     snprintf(mcp_lib, sizeof(mcp_lib), "%sbuild/nerd_mcp.o", exe_path);
     snprintf(llm_lib, sizeof(llm_lib), "%sbuild/nerd_llm.o", exe_path);
     
     // Build clang command
-    char libs[2048] = "";
+    char libs[4096] = "";
     if (needs_http || needs_mcp || needs_llm) {
         strcat(libs, " -lcurl");
     }
+    // JSON support is needed for HTTP (auto-parsing)
     if (needs_http) {
+        strcat(libs, " ");
+        strcat(libs, cjson_lib);
+        strcat(libs, " ");
+        strcat(libs, json_lib);
         strcat(libs, " ");
         strcat(libs, http_lib);
     }
