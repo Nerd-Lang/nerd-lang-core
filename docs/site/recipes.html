@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QQ02NMKSR7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-QQ02NMKSR7');
+  </script>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="images/nerd-dark.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipes - NERD</title>
+  <meta name="description" content="NERD code recipes. Prompt to program examples.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .recipes-page {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .recipes-page h1 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+    .recipes-page .subtitle {
+      color: var(--text-dim);
+      margin-bottom: 3rem;
+    }
+    .category {
+      margin-bottom: 3rem;
+    }
+    .category h2 {
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .recipe-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .recipe-prompt, .recipe-code {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .recipe-prompt {
+      border-right: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .recipe-code {
+      background: var(--code-bg);
+      justify-content: center;
+    }
+    .recipe-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 0.75rem;
+    }
+    .file-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .file-icon {
+      font-size: 0.8rem;
+    }
+    .file-name {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+    .recipe-prompt .prompt-text {
+      margin: 0;
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      flex: 1;
+    }
+    .recipe-prompt .prompt-text .llm-link {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+    .recipe-code pre {
+      margin: 0;
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .recipe-code code {
+      background: none;
+      padding: 0;
+    }
+    .recipe-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .recipe-stats {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+    .recipe-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .include-link {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+    .include-link input {
+      cursor: pointer;
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover {
+      border-color: var(--text-dim);
+      color: var(--text);
+    }
+    @media (max-width: 600px) {
+      .recipe-grid {
+        grid-template-columns: 1fr;
+      }
+      .recipe-prompt {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-banner">
+    🤖 Train your LLM with <a href="/llms.txt"><code>llms.txt</code></a> - use it in Cursor, Claude Code, or any AI tool
+  </div>
+  <nav>
+    <div class="container">
+      <a href="/" class="logo">NERD</a>
+      <ul>
+        <li><a href="/about">Story</a></li>
+        <li><a href="/docs">Docs</a></li>
+        <li><a href="/recipes" class="active">Recipes</a></li>
+        <li><a href="/team">Authors</a></li>
+        <li>
+          <a href="https://github.com/Nerd-Lang/nerd-lang-core" class="github-link" target="_blank">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="recipes-page">
+      <h1>Recipes</h1>
+      <p class="subtitle">Prompt on the left. Code on the right. Sometimes the code is shorter.</p>
+
+      <!-- Basics -->
+      <div class="category">
+        <h2>Basics</h2>
+        
+        <div class="recipe-card" data-prompt="Write a function that adds two numbers and returns the result">
+          <div class="recipe-grid">
+            <div class="recipe-prompt">
+              <div class="recipe-label">Prompt</div>
+              <p class="prompt-text">"Write a function that adds two numbers and returns the result. <span class="llm-link">Use https://nerd-lang.org/llms.txt for syntax.</span>"</p>
+            </div>
+            <div class="recipe-code">
+              <div class="file-header">
+                <span class="file-icon">📄</span>
+                <span class="file-name">add.nerd</span>
+              </div>
+              <pre><code>fn add a b
+ret a plus b</code></pre>
+            </div>
+          </div>
+          <div class="recipe-footer">
+            <span class="recipe-stats">2 lines · 8 tokens</span>
+            <div class="recipe-actions">
+              <label class="include-link"><input type="checkbox" checked onchange="toggleLink(this)"> Include llms.txt</label>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tools -->
+      <div class="category">
+        <h2>Tools</h2>
+        
+        <div class="recipe-card" data-prompt="List all available tools from the Cloudflare MCP server">
+          <div class="recipe-grid">
+            <div class="recipe-prompt">
+              <div class="recipe-label">Prompt</div>
+              <p class="prompt-text">"List all available tools from the Cloudflare MCP server. <span class="llm-link">Use https://nerd-lang.org/llms.txt for syntax.</span>"</p>
+            </div>
+            <div class="recipe-code">
+              <div class="file-header">
+                <span class="file-icon">📄</span>
+                <span class="file-name">tools.nerd</span>
+              </div>
+              <pre><code>mcp tools "https://docs.mcp.cloudflare.com/mcp"</code></pre>
+            </div>
+          </div>
+          <div class="recipe-footer">
+            <span class="recipe-stats">1 line · 5 tokens</span>
+            <div class="recipe-actions">
+              <label class="include-link"><input type="checkbox" checked onchange="toggleLink(this)"> Include llms.txt</label>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Agents -->
+      <div class="category">
+        <h2>Agents</h2>
+        
+        <div class="recipe-card" data-prompt="Ask Claude what Cloudflare Workers is in one sentence">
+          <div class="recipe-grid">
+            <div class="recipe-prompt">
+              <div class="recipe-label">Prompt</div>
+              <p class="prompt-text">"Ask Claude what Cloudflare Workers is in one sentence. <span class="llm-link">Use https://nerd-lang.org/llms.txt for syntax.</span>"</p>
+            </div>
+            <div class="recipe-code">
+              <div class="file-header">
+                <span class="file-icon">📄</span>
+                <span class="file-name">agent.nerd</span>
+              </div>
+              <pre><code>llm claude "What is Cloudflare Workers? One sentence."</code></pre>
+            </div>
+          </div>
+          <div class="recipe-footer">
+            <span class="recipe-stats">1 line · 10 tokens</span>
+            <div class="recipe-actions">
+              <label class="include-link"><input type="checkbox" checked onchange="toggleLink(this)"> Include llms.txt</label>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HTTP -->
+      <div class="category">
+        <h2>HTTP</h2>
+        
+        <div class="recipe-card" data-prompt="Make a GET request to httpbin.org">
+          <div class="recipe-grid">
+            <div class="recipe-prompt">
+              <div class="recipe-label">Prompt</div>
+              <p class="prompt-text">"Make a GET request to httpbin.org. <span class="llm-link">Use https://nerd-lang.org/llms.txt for syntax.</span>"</p>
+            </div>
+            <div class="recipe-code">
+              <div class="file-header">
+                <span class="file-icon">📄</span>
+                <span class="file-name">request.nerd</span>
+              </div>
+              <pre><code>http get "https://httpbin.org/get"</code></pre>
+            </div>
+          </div>
+          <div class="recipe-footer">
+            <span class="recipe-stats">1 line · 4 tokens</span>
+            <div class="recipe-actions">
+              <label class="include-link"><input type="checkbox" checked onchange="toggleLink(this)"> Include llms.txt</label>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p style="text-align: center; color: var(--text-dim); margin-top: 3rem;">
+        <a href="/docs">Get started</a> · <a href="https://github.com/Nerd-Lang/nerd-lang-core/tree/main/examples">More examples on GitHub</a>
+      </p>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      NERD | Apache 2.0 |
+      <a href="https://github.com/Nerd-Lang/nerd-lang-core">GitHub</a>
+    </p>
+  </footer>
+
+  <script>
+    const llmSuffix = ' Use https://nerd-lang.org/llms.txt for syntax.';
+    
+    function toggleLink(checkbox) {
+      const card = checkbox.closest('.recipe-card');
+      const linkSpan = card.querySelector('.llm-link');
+      linkSpan.style.display = checkbox.checked ? 'inline' : 'none';
+    }
+    
+    function copyPrompt(btn) {
+      const card = btn.closest('.recipe-card');
+      const basePrompt = card.dataset.prompt;
+      const includeLink = card.querySelector('.include-link input').checked;
+      const text = includeLink ? basePrompt + llmSuffix : basePrompt;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = original, 1500);
+      });
+    }
+  </script>
+</body>
+</html>
+
