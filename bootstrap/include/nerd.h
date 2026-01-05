@@ -95,6 +95,19 @@ typedef enum {
     TOK_MCP,        // mcp module (Model Context Protocol)
     TOK_LLM,        // llm module (Claude, OpenAI, etc.)
 
+    // HTTP methods
+    TOK_GET,        // get
+    TOK_POST,       // post
+    TOK_PUT,        // put
+    TOK_DELETE,     // delete
+    TOK_PATCH,      // patch
+
+    // HTTP modifiers
+    TOK_WITH,       // with - for headers
+    TOK_AUTH,       // auth - authentication
+    TOK_BEARER,     // bearer - bearer token
+    TOK_BASIC,      // basic - basic auth
+
     // Literals and identifiers
     TOK_NUMBER,     // numeric literal
     TOK_STRING,     // string literal

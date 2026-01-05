@@ -491,22 +491,99 @@ static ASTNode *parse_call(Parser *parser) {
     // Module call: math abs x, http get url, etc.
     if (is_module_token(parser)) {
         Token *mod_tok = parser_advance(parser);
-        Token *func_tok = parser_expect(parser, TOK_IDENT, "Expected function name after module");
-        if (!func_tok) return NULL;
+        
+        // HTTP module: accept method tokens (GET, POST, PUT, DELETE, PATCH) or identifiers
+        const char *func_name = NULL;
+        if (strcmp(mod_tok->value, "http") == 0) {
+            TokenType t = parser_current(parser)->type;
+            if (t == TOK_GET) { func_name = "get"; parser_advance(parser); }
+            else if (t == TOK_POST) { func_name = "post"; parser_advance(parser); }
+            else if (t == TOK_PUT) { func_name = "put"; parser_advance(parser); }
+            else if (t == TOK_DELETE) { func_name = "delete"; parser_advance(parser); }
+            else if (t == TOK_PATCH) { func_name = "patch"; parser_advance(parser); }
+            else if (t == TOK_IDENT) { func_name = parser_advance(parser)->value; }
+            else {
+                fprintf(stderr, "Error at line %d: Expected HTTP method (get, post, put, delete, patch)\n", line);
+                return NULL;
+            }
+        } else {
+            Token *func_tok = parser_expect(parser, TOK_IDENT, "Expected function name after module");
+            if (!func_tok) return NULL;
+            func_name = func_tok->value;
+        }
 
         ASTNode *node = ast_create(NODE_CALL, line);
         node->data.call.module = nerd_strdup(mod_tok->value);
-        node->data.call.func = nerd_strdup(func_tok->value);
+        node->data.call.func = nerd_strdup(func_name);
         ast_list_init(&node->data.call.args);
 
-        // Parse arguments until end of expression context
-        while (!is_end_of_expr(parser)) {
+        // Parse arguments until end of expression context or 'with'/'auth' modifier
+        while (!is_end_of_expr(parser) && 
+               parser_current(parser)->type != TOK_WITH &&
+               parser_current(parser)->type != TOK_AUTH) {
             ASTNode *arg = parse_unary(parser);  // Allow unary ops (neg, not)
             if (!arg) {
                 ast_free(node);
                 return NULL;
             }
             ast_list_push(&node->data.call.args, arg);
+        }
+
+        // Parse 'with' headers: http get "url" with "Header" "Value" with "H2" "V2"
+        while (parser_match(parser, TOK_WITH)) {
+            // Expect header name (string)
+            ASTNode *header_name = parse_unary(parser);
+            if (!header_name) {
+                ast_free(node);
+                return NULL;
+            }
+            ast_list_push(&node->data.call.args, header_name);
+            
+            // Expect header value (string or expression)
+            ASTNode *header_value = parse_unary(parser);
+            if (!header_value) {
+                ast_free(node);
+                return NULL;
+            }
+            ast_list_push(&node->data.call.args, header_value);
+            
+            // Mark that we have headers (use special marker)
+            // We'll handle this in codegen by looking for string pairs after URL/body
+        }
+
+        // Parse 'auth' shortcut: http get "url" auth bearer "token"
+        if (parser_match(parser, TOK_AUTH)) {
+            if (parser_match(parser, TOK_BEARER)) {
+                // auth bearer "token"
+                ASTNode *token_arg = parse_unary(parser);
+                if (!token_arg) {
+                    ast_free(node);
+                    return NULL;
+                }
+                // Add special marker args for bearer auth
+                ASTNode *marker = ast_create(NODE_STR, line);
+                marker->data.str.value = nerd_strdup("__auth_bearer__");
+                ast_list_push(&node->data.call.args, marker);
+                ast_list_push(&node->data.call.args, token_arg);
+            } else if (parser_match(parser, TOK_BASIC)) {
+                // auth basic "user" "pass"
+                ASTNode *user_arg = parse_unary(parser);
+                ASTNode *pass_arg = parse_unary(parser);
+                if (!user_arg || !pass_arg) {
+                    ast_free(node);
+                    return NULL;
+                }
+                // Add special marker args for basic auth
+                ASTNode *marker = ast_create(NODE_STR, line);
+                marker->data.str.value = nerd_strdup("__auth_basic__");
+                ast_list_push(&node->data.call.args, marker);
+                ast_list_push(&node->data.call.args, user_arg);
+                ast_list_push(&node->data.call.args, pass_arg);
+            } else {
+                fprintf(stderr, "Error at line %d: Expected 'bearer' or 'basic' after 'auth'\n", line);
+                ast_free(node);
+                return NULL;
+            }
         }
 
         return node;

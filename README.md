@@ -163,12 +163,19 @@ clang -O2 loops.ll -o loops
 |---------|--------|--------|
 | HTTP GET | `http get "url"` | ✓ Done |
 | HTTP POST | `http post "url" "body"` | ✓ Done |
+| HTTP PUT | `http put "url" "body"` | ✓ Done |
+| HTTP DELETE | `http delete "url"` | ✓ Done |
+| HTTP PATCH | `http patch "url" "body"` | ✓ Done |
+| Custom Headers | `http get "url" with "Header" "Value"` | ✓ Done |
+| Bearer Auth | `http get "url" auth bearer "token"` | ✓ Done |
+| Basic Auth | `http get "url" auth basic "user" "pass"` | ✓ Done |
 | LLM (Claude) | `llm claude "prompt"` | ✓ Done |
 | MCP Tools | `mcp tools "url"` | ✓ Done |
 | MCP Call | `mcp send "url" "tool" "args"` | ✓ Done |
 | .env support | Auto-loads `ANTHROPIC_API_KEY` | ✓ Done |
 | JSON Access | `obj."path"`, `obj?"key"` | ✓ Done |
 | JSON Create | `let x {}`, `x."key" = val` | ✓ Done |
+| OAuth 2.1 | For MCP server authentication | Coming next |
 | Streaming | SSE for real-time responses | Coming next |
 
 **Example agent:**
@@ -176,6 +183,12 @@ clang -O2 loops.ll -o loops
 -- Agent in NERD
 
 llm claude "What is Cloudflare Workers? One sentence."
+```
+
+**HTTP with Bearer Auth (OAuth):**
+```
+-- Authenticated API call
+http get "https://api.example.com/data" auth bearer "token123"
 ```
 
 **JSON from HTTP:**

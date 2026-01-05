@@ -282,22 +282,22 @@ ret a plus b</code></pre>
       <div class="category">
         <h2>HTTP</h2>
         
-        <div class="recipe-card" data-prompt="Make a GET request to httpbin.org">
+        <div class="recipe-card" data-prompt="Make an authenticated GET request with a Bearer token">
           <div class="recipe-grid">
             <div class="recipe-prompt">
               <div class="recipe-label">Prompt</div>
-              <p class="prompt-text">"Make a GET request to httpbin.org. <span class="llm-link">Use https://nerd-lang.org/llms.txt for syntax.</span>"</p>
+              <p class="prompt-text">"Make an authenticated GET request with a Bearer token. <span class="llm-link">Use https://nerd-lang.org/llms.txt for syntax.</span>"</p>
             </div>
             <div class="recipe-code">
               <div class="file-header">
                 <span class="file-icon">📄</span>
-                <span class="file-name">request.nerd</span>
+                <span class="file-name">auth.nerd</span>
               </div>
-              <pre><code>http get "https://httpbin.org/get"</code></pre>
+              <pre><code>http get "https://api.example.com/data" auth bearer "token123"</code></pre>
             </div>
           </div>
           <div class="recipe-footer">
-            <span class="recipe-stats">1 line · 4 tokens</span>
+            <span class="recipe-stats">1 line · 7 tokens</span>
             <div class="recipe-actions">
               <label class="include-link"><input type="checkbox" checked onchange="toggleLink(this)"> Include llms.txt</label>
               <button class="copy-btn" onclick="copyPrompt(this)">Copy Prompt</button>

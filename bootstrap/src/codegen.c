@@ -522,50 +522,148 @@ static int codegen_expr(CodeGen *cg, ASTNode *node) {
                 if (node->data.call.args.count > 0) {
                     // Get URL argument (must be a string literal)
                     ASTNode *url_node = node->data.call.args.nodes[0];
+                    
+                    // Check for headers/auth markers
+                    int has_auth_bearer = 0;
+                    int has_auth_basic = 0;
+                    int auth_idx = -1;  // Index of __auth_bearer__ or __auth_basic__ marker
+                    int header_start = -1;  // Start index of custom headers (with keyword)
+                    
+                    // For GET: args = [url, header1, value1, ...] or [url, __auth_bearer__, token]
+                    // For POST: args = [url, body, header1, value1, ...] or [url, body, __auth_*, ...]
+                    int body_offset = (strcmp(node->data.call.func, "get") == 0 || 
+                                       strcmp(node->data.call.func, "delete") == 0) ? 1 : 2;
+                    
+                    for (size_t i = body_offset; i < node->data.call.args.count; i++) {
+                        ASTNode *arg = node->data.call.args.nodes[i];
+                        if (arg->type == NODE_STR) {
+                            if (strcmp(arg->data.str.value, "__auth_bearer__") == 0) {
+                                has_auth_bearer = 1;
+                                auth_idx = (int)i;
+                                break;
+                            } else if (strcmp(arg->data.str.value, "__auth_basic__") == 0) {
+                                has_auth_basic = 1;
+                                auth_idx = (int)i;
+                                break;
+                            } else if (header_start < 0) {
+                                // First non-auth string after URL/body is start of headers
+                                header_start = (int)i;
+                            }
+                        }
+                    }
 
                     if (strcmp(node->data.call.func, "get") == 0) {
-                        // Use string counter (same as out statement)
                         if (url_node->type == NODE_STR) {
-                            int str_idx = cg->string_counter++;
-
-                            size_t len = actual_string_len(url_node->data.str.value) + 1;
+                            int url_idx = cg->string_counter++;
+                            size_t url_len = actual_string_len(url_node->data.str.value) + 1;
                             int url_ptr = next_temp(cg);
                             fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
-                                    url_ptr, len, len, str_idx);
-
-                            // Call http_get
+                                    url_ptr, url_len, url_len, url_idx);
+                            
+                            int headers_ptr = 0;  // Will be null or pointer to headers JSON
+                            
+                            if (has_auth_bearer && auth_idx >= 0 && (size_t)(auth_idx + 1) < node->data.call.args.count) {
+                                // Build headers with Bearer auth
+                                // Skip the marker string index (it was collected by collect_strings)
+                                cg->string_counter++;  // Skip "__auth_bearer__" marker
+                                ASTNode *token_node = node->data.call.args.nodes[auth_idx + 1];
+                                if (token_node->type == NODE_STR) {
+                                    int token_idx = cg->string_counter++;
+                                    size_t token_len = actual_string_len(token_node->data.str.value) + 1;
+                                    int token_ptr = next_temp(cg);
+                                    fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                            token_ptr, token_len, token_len, token_idx);
+                                    
+                                    headers_ptr = next_temp(cg);
+                                    fprintf(cg->out, "  %%t%d = call i8* @nerd_http_auth_bearer(i8* %%t%d)\n", 
+                                            headers_ptr, token_ptr);
+                                }
+                            } else if (has_auth_basic && auth_idx >= 0 && (size_t)(auth_idx + 2) < node->data.call.args.count) {
+                                // Build headers with Basic auth
+                                // Skip the marker string index (it was collected by collect_strings)
+                                cg->string_counter++;  // Skip "__auth_basic__" marker
+                                ASTNode *user_node = node->data.call.args.nodes[auth_idx + 1];
+                                ASTNode *pass_node = node->data.call.args.nodes[auth_idx + 2];
+                                if (user_node->type == NODE_STR && pass_node->type == NODE_STR) {
+                                    int user_idx = cg->string_counter++;
+                                    int pass_idx = cg->string_counter++;
+                                    size_t user_len = actual_string_len(user_node->data.str.value) + 1;
+                                    size_t pass_len = actual_string_len(pass_node->data.str.value) + 1;
+                                    
+                                    int user_ptr = next_temp(cg);
+                                    fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                            user_ptr, user_len, user_len, user_idx);
+                                    int pass_ptr = next_temp(cg);
+                                    fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                            pass_ptr, pass_len, pass_len, pass_idx);
+                                    
+                                    headers_ptr = next_temp(cg);
+                                    fprintf(cg->out, "  %%t%d = call i8* @nerd_http_auth_basic(i8* %%t%d, i8* %%t%d)\n", 
+                                            headers_ptr, user_ptr, pass_ptr);
+                                }
+                            } else if (header_start >= 0) {
+                                // Build headers JSON from with pairs
+                                headers_ptr = next_temp(cg);
+                                fprintf(cg->out, "  %%t%d = call i8* @nerd_json_new()\n", headers_ptr);
+                                
+                                // Process header pairs
+                                for (size_t i = header_start; i + 1 < node->data.call.args.count; i += 2) {
+                                    ASTNode *hname = node->data.call.args.nodes[i];
+                                    ASTNode *hvalue = node->data.call.args.nodes[i + 1];
+                                    
+                                    // Skip auth markers
+                                    if (hname->type == NODE_STR && 
+                                        (strcmp(hname->data.str.value, "__auth_bearer__") == 0 ||
+                                         strcmp(hname->data.str.value, "__auth_basic__") == 0)) {
+                                        break;
+                                    }
+                                    
+                                    if (hname->type == NODE_STR && hvalue->type == NODE_STR) {
+                                        int hname_idx = cg->string_counter++;
+                                        int hvalue_idx = cg->string_counter++;
+                                        size_t hname_len = actual_string_len(hname->data.str.value) + 1;
+                                        size_t hvalue_len = actual_string_len(hvalue->data.str.value) + 1;
+                                        
+                                        int hname_ptr = next_temp(cg);
+                                        fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                                hname_ptr, hname_len, hname_len, hname_idx);
+                                        int hvalue_ptr = next_temp(cg);
+                                        fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                                hvalue_ptr, hvalue_len, hvalue_len, hvalue_idx);
+                                        
+                                        fprintf(cg->out, "  call void @nerd_json_set_string(i8* %%t%d, i8* %%t%d, i8* %%t%d)\n",
+                                                headers_ptr, hname_ptr, hvalue_ptr);
+                                    }
+                                }
+                            }
+                            
+                            // Call http_get_full with headers (or null)
                             int response_ptr = next_temp(cg);
-                            fprintf(cg->out, "  %%t%d = call i8* @nerd_http_get(i8* %%t%d)\n", response_ptr, url_ptr);
-
-                            // Print response if not null
-                            int is_null = next_temp(cg);
-                            fprintf(cg->out, "  %%t%d = icmp eq i8* %%t%d, null\n", is_null, response_ptr);
-
-                            int then_label = next_label(cg);
-                            int else_label = next_label(cg);
-                            int end_label = next_label(cg);
-
-                            fprintf(cg->out, "  br i1 %%t%d, label %%http_err%d, label %%http_ok%d\n",
-                                    is_null, then_label, else_label);
-
-                            // Error case
-                            fprintf(cg->out, "http_err%d:\n", then_label);
-                            fprintf(cg->out, "  br label %%http_end%d\n", end_label);
-
-                            // Success case - print response
-                            fprintf(cg->out, "http_ok%d:\n", else_label);
-                            fprintf(cg->out, "  call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @.fmt_str, i32 0, i32 0), i8* %%t%d)\n", response_ptr);
-                            fprintf(cg->out, "  call void @nerd_http_free(i8* %%t%d)\n", response_ptr);
-                            fprintf(cg->out, "  br label %%http_end%d\n", end_label);
-
-                            fprintf(cg->out, "http_end%d:\n", end_label);
+                            if (headers_ptr > 0) {
+                                fprintf(cg->out, "  %%t%d = call i8* @nerd_http_get_full(i8* %%t%d, i8* %%t%d)\n", 
+                                        response_ptr, url_ptr, headers_ptr);
+                            } else {
+                                fprintf(cg->out, "  %%t%d = call i8* @nerd_http_get_full(i8* %%t%d, i8* null)\n", 
+                                        response_ptr, url_ptr);
+                            }
+                            
+                            // Print response via JSON stringify
+                            int str_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_json_stringify(i8* %%t%d)\n", str_ptr, response_ptr);
+                            fprintf(cg->out, "  call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @.fmt_str, i32 0, i32 0), i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free_string(i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free(i8* %%t%d)\n", response_ptr);
+                            
+                            if (headers_ptr > 0) {
+                                fprintf(cg->out, "  call void @nerd_json_free(i8* %%t%d)\n", headers_ptr);
+                            }
                         }
 
                         fprintf(cg->out, "  %%t%d = fadd double 0.0, 0.0\n", result_reg);
                         return result_reg;
                     }
 
-                    // HTTP POST
+                    // HTTP POST (with body and optional headers/auth)
                     if (strcmp(node->data.call.func, "post") == 0 && node->data.call.args.count >= 2) {
                         ASTNode *body_node = node->data.call.args.nodes[1];
 
@@ -584,31 +682,166 @@ static int codegen_expr(CodeGen *cg, ASTNode *node) {
                             fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
                                     body_ptr, body_len, body_len, body_idx);
 
-                            // Call http_post
+                            // Check for headers/auth (body_offset=2 for POST)
+                            int headers_ptr = 0;
+                            
+                            if (has_auth_bearer && auth_idx >= 0 && (size_t)(auth_idx + 1) < node->data.call.args.count) {
+                                cg->string_counter++;  // Skip marker
+                                ASTNode *token_node = node->data.call.args.nodes[auth_idx + 1];
+                                if (token_node->type == NODE_STR) {
+                                    int token_idx = cg->string_counter++;
+                                    size_t token_len = actual_string_len(token_node->data.str.value) + 1;
+                                    int token_ptr = next_temp(cg);
+                                    fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                            token_ptr, token_len, token_len, token_idx);
+                                    headers_ptr = next_temp(cg);
+                                    fprintf(cg->out, "  %%t%d = call i8* @nerd_http_auth_bearer(i8* %%t%d)\n",
+                                            headers_ptr, token_ptr);
+                                }
+                            } else if (header_start >= 0) {
+                                headers_ptr = next_temp(cg);
+                                fprintf(cg->out, "  %%t%d = call i8* @nerd_json_new()\n", headers_ptr);
+                                for (size_t i = header_start; i + 1 < node->data.call.args.count; i += 2) {
+                                    ASTNode *hname = node->data.call.args.nodes[i];
+                                    ASTNode *hvalue = node->data.call.args.nodes[i + 1];
+                                    if (hname->type == NODE_STR && 
+                                        (strcmp(hname->data.str.value, "__auth_bearer__") == 0 ||
+                                         strcmp(hname->data.str.value, "__auth_basic__") == 0)) break;
+                                    if (hname->type == NODE_STR && hvalue->type == NODE_STR) {
+                                        int hidx1 = cg->string_counter++;
+                                        int hidx2 = cg->string_counter++;
+                                        size_t hlen1 = actual_string_len(hname->data.str.value) + 1;
+                                        size_t hlen2 = actual_string_len(hvalue->data.str.value) + 1;
+                                        int hp1 = next_temp(cg);
+                                        int hp2 = next_temp(cg);
+                                        fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                                hp1, hlen1, hlen1, hidx1);
+                                        fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                                hp2, hlen2, hlen2, hidx2);
+                                        fprintf(cg->out, "  call void @nerd_json_set_string(i8* %%t%d, i8* %%t%d, i8* %%t%d)\n",
+                                                headers_ptr, hp1, hp2);
+                                    }
+                                }
+                            }
+
+                            // Call http_post_full with headers
                             int response_ptr = next_temp(cg);
-                            fprintf(cg->out, "  %%t%d = call i8* @nerd_http_post(i8* %%t%d, i8* %%t%d)\n",
+                            if (headers_ptr > 0) {
+                                fprintf(cg->out, "  %%t%d = call i8* @nerd_http_post_full(i8* %%t%d, i8* %%t%d, i8* %%t%d)\n",
+                                        response_ptr, url_ptr, body_ptr, headers_ptr);
+                            } else {
+                                fprintf(cg->out, "  %%t%d = call i8* @nerd_http_post_full(i8* %%t%d, i8* %%t%d, i8* null)\n",
+                                        response_ptr, url_ptr, body_ptr);
+                            }
+
+                            // Print response via JSON stringify
+                            int str_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_json_stringify(i8* %%t%d)\n", str_ptr, response_ptr);
+                            fprintf(cg->out, "  call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @.fmt_str, i32 0, i32 0), i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free_string(i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free(i8* %%t%d)\n", response_ptr);
+                            if (headers_ptr > 0) {
+                                fprintf(cg->out, "  call void @nerd_json_free(i8* %%t%d)\n", headers_ptr);
+                            }
+                        }
+
+                        fprintf(cg->out, "  %%t%d = fadd double 0.0, 0.0\n", result_reg);
+                        return result_reg;
+                    }
+
+                    // HTTP PUT (with body)
+                    if (strcmp(node->data.call.func, "put") == 0 && node->data.call.args.count >= 2) {
+                        ASTNode *body_node = node->data.call.args.nodes[1];
+
+                        if (url_node->type == NODE_STR && body_node->type == NODE_STR) {
+                            int url_idx = cg->string_counter++;
+                            int body_idx = cg->string_counter++;
+
+                            size_t url_len = actual_string_len(url_node->data.str.value) + 1;
+                            size_t body_len = actual_string_len(body_node->data.str.value) + 1;
+
+                            int url_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                    url_ptr, url_len, url_len, url_idx);
+
+                            int body_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                    body_ptr, body_len, body_len, body_idx);
+
+                            // Call http_put (null headers for now)
+                            int response_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_http_put(i8* %%t%d, i8* %%t%d, i8* null)\n",
                                     response_ptr, url_ptr, body_ptr);
 
-                            // Print response if not null
-                            int is_null = next_temp(cg);
-                            fprintf(cg->out, "  %%t%d = icmp eq i8* %%t%d, null\n", is_null, response_ptr);
+                            // Print response via JSON stringify
+                            int str_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_json_stringify(i8* %%t%d)\n", str_ptr, response_ptr);
+                            fprintf(cg->out, "  call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @.fmt_str, i32 0, i32 0), i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free_string(i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free(i8* %%t%d)\n", response_ptr);
+                        }
 
-                            int then_label = next_label(cg);
-                            int else_label = next_label(cg);
-                            int end_label = next_label(cg);
+                        fprintf(cg->out, "  %%t%d = fadd double 0.0, 0.0\n", result_reg);
+                        return result_reg;
+                    }
 
-                            fprintf(cg->out, "  br i1 %%t%d, label %%http_err%d, label %%http_ok%d\n",
-                                    is_null, then_label, else_label);
+                    // HTTP DELETE (no body)
+                    if (strcmp(node->data.call.func, "delete") == 0) {
+                        if (url_node->type == NODE_STR) {
+                            int url_idx = cg->string_counter++;
+                            size_t url_len = actual_string_len(url_node->data.str.value) + 1;
 
-                            fprintf(cg->out, "http_err%d:\n", then_label);
-                            fprintf(cg->out, "  br label %%http_end%d\n", end_label);
+                            int url_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                    url_ptr, url_len, url_len, url_idx);
 
-                            fprintf(cg->out, "http_ok%d:\n", else_label);
-                            fprintf(cg->out, "  call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @.fmt_str, i32 0, i32 0), i8* %%t%d)\n", response_ptr);
-                            fprintf(cg->out, "  call void @nerd_http_free(i8* %%t%d)\n", response_ptr);
-                            fprintf(cg->out, "  br label %%http_end%d\n", end_label);
+                            // Call http_delete (null headers for now)
+                            int response_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_http_delete(i8* %%t%d, i8* null)\n",
+                                    response_ptr, url_ptr);
 
-                            fprintf(cg->out, "http_end%d:\n", end_label);
+                            // Print response via JSON stringify
+                            int str_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_json_stringify(i8* %%t%d)\n", str_ptr, response_ptr);
+                            fprintf(cg->out, "  call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @.fmt_str, i32 0, i32 0), i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free_string(i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free(i8* %%t%d)\n", response_ptr);
+                        }
+
+                        fprintf(cg->out, "  %%t%d = fadd double 0.0, 0.0\n", result_reg);
+                        return result_reg;
+                    }
+
+                    // HTTP PATCH (with body)
+                    if (strcmp(node->data.call.func, "patch") == 0 && node->data.call.args.count >= 2) {
+                        ASTNode *body_node = node->data.call.args.nodes[1];
+
+                        if (url_node->type == NODE_STR && body_node->type == NODE_STR) {
+                            int url_idx = cg->string_counter++;
+                            int body_idx = cg->string_counter++;
+
+                            size_t url_len = actual_string_len(url_node->data.str.value) + 1;
+                            size_t body_len = actual_string_len(body_node->data.str.value) + 1;
+
+                            int url_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                    url_ptr, url_len, url_len, url_idx);
+
+                            int body_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = getelementptr [%zu x i8], [%zu x i8]* @.str%d, i32 0, i32 0\n",
+                                    body_ptr, body_len, body_len, body_idx);
+
+                            // Call http_patch (null headers for now)
+                            int response_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_http_patch(i8* %%t%d, i8* %%t%d, i8* null)\n",
+                                    response_ptr, url_ptr, body_ptr);
+
+                            // Print response via JSON stringify
+                            int str_ptr = next_temp(cg);
+                            fprintf(cg->out, "  %%t%d = call i8* @nerd_json_stringify(i8* %%t%d)\n", str_ptr, response_ptr);
+                            fprintf(cg->out, "  call i32 (i8*, ...) @printf(i8* getelementptr ([4 x i8], [4 x i8]* @.fmt_str, i32 0, i32 0), i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free_string(i8* %%t%d)\n", str_ptr);
+                            fprintf(cg->out, "  call void @nerd_json_free(i8* %%t%d)\n", response_ptr);
                         }
 
                         fprintf(cg->out, "  %%t%d = fadd double 0.0, 0.0\n", result_reg);
@@ -1352,13 +1585,22 @@ bool codegen_llvm(NerdContext *ctx, const char *output_path) {
     fprintf(out, "declare i32 @printf(i8*, ...)\n");
     fprintf(out, "\n");
 
-    // HTTP runtime declarations
+    // HTTP runtime declarations (legacy)
     fprintf(out, "declare i8* @nerd_http_get(i8*)\n");
     fprintf(out, "declare i8* @nerd_http_post(i8*, i8*)\n");
     fprintf(out, "declare void @nerd_http_free(i8*)\n");
     fprintf(out, "declare i8* @nerd_http_get_json(i8*)\n");
     fprintf(out, "declare i8* @nerd_http_post_json(i8*, i8*)\n");
     fprintf(out, "declare i8* @nerd_http_post_json_body(i8*, i8*)\n");
+    // HTTP runtime declarations (full)
+    fprintf(out, "declare i8* @nerd_http_request(i8*, i8*, i8*, i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_get_full(i8*, i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_post_full(i8*, i8*, i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_put(i8*, i8*, i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_delete(i8*, i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_patch(i8*, i8*, i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_auth_bearer(i8*)\n");
+    fprintf(out, "declare i8* @nerd_http_auth_basic(i8*, i8*)\n");
     fprintf(out, "\n");
 
     // MCP runtime declarations

@@ -51,6 +51,12 @@ mcp tools "url"                  - Discover MCP tools
 mcp send "url" "tool" "params"   - Call MCP tool
 http get "url"                   - HTTP GET (returns JSON)
 http post "url" "body"           - HTTP POST (returns JSON)
+http put "url" "body"            - HTTP PUT (returns JSON)
+http delete "url"                - HTTP DELETE (returns JSON)
+http patch "url" "body"          - HTTP PATCH (returns JSON)
+http get "url" with "H" "V"      - Custom headers
+http get "url" auth bearer "tok" - Bearer authentication
+http get "url" auth basic "u" "p"- Basic authentication
 obj."path"                       - Access JSON value
 obj?"key"                        - Check if key exists
 obj."key" = value                - Set JSON value
@@ -224,6 +230,21 @@ Calls Claude API. Requires ANTHROPIC_API_KEY in environment or .env file.
 ```
 http get "url"
 http post "url" "json body"
+http put "url" "json body"
+http delete "url"
+http patch "url" "json body"
+```
+
+With custom headers:
+```
+http get "url" with "Authorization" "Bearer token123"
+http get "url" with "X-Api-Key" "mykey"
+```
+
+With auth shortcuts:
+```
+http get "url" auth bearer "token123"
+http get "url" auth basic "username" "password"
 ```
 
 ### MCP Tool Calls

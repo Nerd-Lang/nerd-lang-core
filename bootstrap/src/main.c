@@ -112,6 +112,15 @@ static const char *token_name(TokenType type) {
         case TOK_JSON: return "JSON";
         case TOK_MCP: return "MCP";
         case TOK_LLM: return "LLM";
+        case TOK_GET: return "GET";
+        case TOK_POST: return "POST";
+        case TOK_PUT: return "PUT";
+        case TOK_DELETE: return "DELETE";
+        case TOK_PATCH: return "PATCH";
+        case TOK_WITH: return "WITH";
+        case TOK_AUTH: return "AUTH";
+        case TOK_BEARER: return "BEARER";
+        case TOK_BASIC: return "BASIC";
         case TOK_COUNT: return "COUNT";
         case TOK_LBRACE: return "LBRACE";
         case TOK_RBRACE: return "RBRACE";

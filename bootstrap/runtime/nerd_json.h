@@ -28,6 +28,7 @@ int nerd_json_has(nerd_json* j, const char* path);    // Key exists
 void nerd_json_set_string(nerd_json* j, const char* key, const char* val);
 void nerd_json_set_number(nerd_json* j, const char* key, double val);
 void nerd_json_set_bool(nerd_json* j, const char* key, int val);
+void nerd_json_set_object(nerd_json* j, const char* key, nerd_json* val);
 
 // Serialize
 char* nerd_json_stringify(nerd_json* j);

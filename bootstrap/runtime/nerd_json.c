@@ -175,6 +175,14 @@ void nerd_json_set_bool(nerd_json* j, const char* key, int val) {
     cJSON_AddBoolToObject(j, key, val);
 }
 
+// Set object value (takes ownership of val)
+void nerd_json_set_object(nerd_json* j, const char* key, nerd_json* val) {
+    if (!j || !key || !val) return;
+    
+    cJSON_DeleteItemFromObject(j, key);
+    cJSON_AddItemToObject(j, key, val);
+}
+
 // Serialize to JSON string
 // Caller must free with nerd_json_free_string
 char* nerd_json_stringify(nerd_json* j) {

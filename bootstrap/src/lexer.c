@@ -88,6 +88,19 @@ static const Keyword keywords[] = {
     {"mcp", TOK_MCP},
     {"llm", TOK_LLM},
 
+    // HTTP methods
+    {"get", TOK_GET},
+    {"post", TOK_POST},
+    {"put", TOK_PUT},
+    {"delete", TOK_DELETE},
+    {"patch", TOK_PATCH},
+
+    // HTTP modifiers
+    {"with", TOK_WITH},
+    {"auth", TOK_AUTH},
+    {"bearer", TOK_BEARER},
+    {"basic", TOK_BASIC},
+
     {NULL, TOK_EOF}
 };
 
