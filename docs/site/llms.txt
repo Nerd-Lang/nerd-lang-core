@@ -450,12 +450,13 @@ NERD achieves 50-70% fewer tokens than traditional languages for equivalent logi
 
 ```bash
 # Install (macOS Apple Silicon)
-curl -L https://github.com/Nerd-Lang/nerd-lang-core/releases/latest/download/nerd-darwin-arm64 -o nerd
-chmod +x nerd
+curl -L https://github.com/Nerd-Lang/nerd-lang-core/releases/latest/download/nerd-darwin-arm64.tar.gz | tar -xz
+sudo mv nerd-darwin-arm64 /usr/local/nerd
+export PATH="$PATH:/usr/local/nerd"
 
 # Run an agent
 echo 'llm claude "Hello"' > hello.nerd
-./nerd run hello.nerd
+nerd run hello.nerd
 ```
 
 ## License

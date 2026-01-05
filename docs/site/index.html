@@ -139,22 +139,20 @@ ret err "unknown"</code></pre>
     <section>
       <h2>Quick Start</h2>
       <pre style="max-width: 700px; margin: 0 auto;"><code># Install (macOS Apple Silicon)
-curl -L https://github.com/Nerd-Lang/nerd-lang-core/releases/latest/download/nerd-darwin-arm64 -o nerd
-chmod +x nerd
+curl -L https://github.com/Nerd-Lang/nerd-lang-core/releases/latest/download/nerd-darwin-arm64.tar.gz | tar -xz
+sudo mv nerd-darwin-arm64 /usr/local/nerd
+export PATH="$PATH:/usr/local/nerd"
 
 # Write a program
-echo 'fn add a b
-ret a plus b
-
-fn mul a b
-ret a times b' > math.nerd
+echo 'out "Hello from NERD"
+out five plus three' > hello.nerd
 
 # Run it
-./nerd run math.nerd
+nerd run hello.nerd
 
 # Output:
-# add = 8
-# mul = 15</code></pre>
+# Hello from NERD
+# 8</code></pre>
       <p style="text-align: center; margin-top: 2rem;">
         <a href="https://github.com/Nerd-Lang/nerd-lang-core" target="_blank" class="github-cta">
           <svg viewBox="0 0 16 16" aria-hidden="true" width="20" height="20">

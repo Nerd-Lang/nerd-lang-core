@@ -626,13 +626,25 @@ static int cmd_run(int argc, char **argv) {
     char *last_slash = strrchr(exe_path, '/');
     if (last_slash) *(last_slash + 1) = '\0';
     
+    // Determine runtime lib path: try lib/ first (release), then build/ (dev)
+    char lib_path[1024];
+    char test_path[1024];
+    snprintf(test_path, sizeof(test_path), "%slib/cJSON.o", exe_path);
+    if (access(test_path, F_OK) == 0) {
+        // Release mode: libs in lib/ subfolder
+        snprintf(lib_path, sizeof(lib_path), "%slib/", exe_path);
+    } else {
+        // Dev mode: libs in build/ subfolder
+        snprintf(lib_path, sizeof(lib_path), "%sbuild/", exe_path);
+    }
+    
     // Build library paths
     char cjson_lib[1024], json_lib[1024], http_lib[1024], mcp_lib[1024], llm_lib[1024];
-    snprintf(cjson_lib, sizeof(cjson_lib), "%sbuild/cJSON.o", exe_path);
-    snprintf(json_lib, sizeof(json_lib), "%sbuild/nerd_json.o", exe_path);
-    snprintf(http_lib, sizeof(http_lib), "%sbuild/nerd_http.o", exe_path);
-    snprintf(mcp_lib, sizeof(mcp_lib), "%sbuild/nerd_mcp.o", exe_path);
-    snprintf(llm_lib, sizeof(llm_lib), "%sbuild/nerd_llm.o", exe_path);
+    snprintf(cjson_lib, sizeof(cjson_lib), "%scJSON.o", lib_path);
+    snprintf(json_lib, sizeof(json_lib), "%snerd_json.o", lib_path);
+    snprintf(http_lib, sizeof(http_lib), "%snerd_http.o", lib_path);
+    snprintf(mcp_lib, sizeof(mcp_lib), "%snerd_mcp.o", lib_path);
+    snprintf(llm_lib, sizeof(llm_lib), "%snerd_llm.o", lib_path);
     
     // Build clang command
     char libs[4096] = "";

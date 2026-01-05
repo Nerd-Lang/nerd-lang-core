@@ -142,6 +142,32 @@ install: $(BIN)
 	cp $(BIN) /usr/local/bin/nerd
 	@echo "Installed to /usr/local/bin/nerd"
 
+# Release packaging
+DIST_DIR = dist
+RELEASE_NAME = nerd-darwin-arm64
+
+release: $(BIN) runtime-all
+	@echo "Creating release package..."
+	rm -rf $(DIST_DIR)
+	mkdir -p $(DIST_DIR)/$(RELEASE_NAME)/lib
+	cp $(BIN) $(DIST_DIR)/$(RELEASE_NAME)/
+	cp $(LIB_CJSON_OBJ) $(DIST_DIR)/$(RELEASE_NAME)/lib/
+	cp $(RUNTIME_JSON_OBJ) $(DIST_DIR)/$(RELEASE_NAME)/lib/
+	cp $(RUNTIME_HTTP_OBJ) $(DIST_DIR)/$(RELEASE_NAME)/lib/
+	cp $(RUNTIME_MCP_OBJ) $(DIST_DIR)/$(RELEASE_NAME)/lib/
+	cp $(RUNTIME_LLM_OBJ) $(DIST_DIR)/$(RELEASE_NAME)/lib/
+	cd $(DIST_DIR) && tar -czvf $(RELEASE_NAME).tar.gz $(RELEASE_NAME)
+	@echo ""
+	@echo "Release created: $(DIST_DIR)/$(RELEASE_NAME).tar.gz"
+	@echo ""
+	@echo "Contents:"
+	@tar -tzvf $(DIST_DIR)/$(RELEASE_NAME).tar.gz
+	@echo ""
+	@echo "To install:"
+	@echo "  tar -xzf $(RELEASE_NAME).tar.gz"
+	@echo "  mv $(RELEASE_NAME) ~/.nerd"
+	@echo "  export PATH=\$$PATH:~/.nerd/$(RELEASE_NAME)"
+
 # Help
 help:
 	@echo "NERD Bootstrap Compiler"

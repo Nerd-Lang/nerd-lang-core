@@ -22,3 +22,6 @@ CLAUDE.md
 # Pre-built binaries (now distributed via GitHub Releases)
 /bin/
 examples/.env
+/bootstrap/dist
+nerd-darwin-arm64
+nerd-darwin-arm64

@@ -63,20 +63,19 @@
 
         <h2 id="quick">Quick Start (macOS Apple Silicon)</h2>
         <pre><code># Install
-curl -L https://github.com/Nerd-Lang/nerd-lang-core/releases/latest/download/nerd-darwin-arm64 -o nerd
-chmod +x nerd
+curl -L https://github.com/Nerd-Lang/nerd-lang-core/releases/latest/download/nerd-darwin-arm64.tar.gz | tar -xz
+sudo mv nerd-darwin-arm64 /usr/local/nerd
+export PATH="$PATH:/usr/local/nerd"
 
 # Write a program
-echo 'fn add a b
-ret a plus b
-
-fn mul a b
-ret a times b' > math.nerd
+echo 'out "Hello from NERD"
+out five plus three' > hello.nerd
 
 # Run it
-./nerd run math.nerd
+nerd run hello.nerd
 # Output:
-# add = 8
+# Hello from NERD
+# 8
 # mul = 15</code></pre>
 
         <h2 id="source">From Source</h2>

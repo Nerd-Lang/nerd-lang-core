@@ -494,7 +494,8 @@ The bootstrap compiler is working. It compiles NERD to native binaries via LLVM.
 
 ```bash
 # macOS (Apple Silicon)
-curl -L https://github.com/Nerd-Lang/nerd-lang-core/releases/latest/download/nerd-darwin-arm64 -o nerd && chmod +x nerd
+curl -L https://github.com/Nerd-Lang/nerd-lang-core/releases/latest/download/nerd-darwin-arm64.tar.gz | tar -xz
+sudo mv nerd-darwin-arm64 /usr/local/nerd && export PATH="$PATH:/usr/local/nerd"
 
 # Or build from source
 git clone https://github.com/Nerd-Lang/nerd-lang-core.git
