@@ -7,6 +7,10 @@
  *   nerd parse <file.nerd>                  Parse and dump AST
  */
 
+#ifdef __linux__
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
